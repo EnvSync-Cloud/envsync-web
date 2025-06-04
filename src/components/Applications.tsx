@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Database, Calendar, MoreHorizontal } from "lucide-react";
+import { Plus, Database, MoreHorizontal, Settings, Copy, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,8 @@ export const Applications = () => {
       id: "app_1",
       name: "Frontend App",
       description: "React application for customer portal",
-      envCount: 24,
+      configs: 3,
+      secrets: 24,
       lastUpdated: "2 hours ago",
       status: "active",
     },
@@ -24,16 +25,27 @@ export const Applications = () => {
       id: "app_2",
       name: "Backend API",
       description: "Node.js REST API for core services",
-      envCount: 18,
+      configs: 4,
+      secrets: 18,
       lastUpdated: "1 day ago",
       status: "active",
     },
     {
       id: "app_3",
+      name: "Mobile App",
+      description: "React Native mobile application",
+      configs: 2,
+      secrets: 12,
+      lastUpdated: "3 days ago",
+      status: "active",
+    },
+    {
+      id: "app_4",
       name: "Data Pipeline",
       description: "Python ETL jobs for data processing",
-      envCount: 12,
-      lastUpdated: "3 days ago",
+      configs: 3,
+      secrets: 15,
+      lastUpdated: "1 week ago",
       status: "inactive",
     },
   ]);
@@ -42,75 +54,80 @@ export const Applications = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Applications</h1>
+          <h1 className="text-3xl font-bold text-white">Projects</h1>
           <p className="text-gray-400 mt-2">
-            Manage your applications and their environment variables
+            Manage your applications and their configurations
           </p>
         </div>
         <Button className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white">
           <Plus className="w-4 h-4 mr-2" />
-          New Application
+          Create Project
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {applications.map((app) => (
-          <Card key={app.id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
+          <Card key={app.id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors group cursor-pointer">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Database className="w-5 h-5 text-violet-500" />
-                  <CardTitle className="text-lg">{app.name}</CardTitle>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-electric_indigo-500 to-violet-500 rounded-xl flex items-center justify-center">
+                    <Database className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg text-white">{app.name}</CardTitle>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        app.status === 'active' 
+                          ? 'bg-green-900 text-green-300' 
+                          : 'bg-gray-700 text-gray-300'
+                      }`}>
+                        {app.status}
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity text-white hover:bg-gray-700">
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-gray-800 border-gray-700">
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-400">Delete</DropdownMenuItem>
+                    <DropdownMenuItem className="text-white hover:bg-gray-700">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-white hover:bg-gray-700">
+                      <Copy className="w-4 h-4 mr-2" />
+                      Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-400 hover:bg-gray-700">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-400 text-sm mb-4">{app.description}</p>
+              <p className="text-gray-400 text-sm mb-6">{app.description}</p>
               
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Environment Variables</span>
-                  <span className="font-medium">{app.envCount}</span>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="text-center p-3 bg-gray-900 rounded-lg">
+                  <div className="text-2xl font-bold text-white">{app.configs}</div>
+                  <div className="text-xs text-gray-400">Configs</div>
                 </div>
-                
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Status</span>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    app.status === 'active' 
-                      ? 'bg-green-900 text-green-300' 
-                      : 'bg-gray-700 text-gray-300'
-                  }`}>
-                    {app.status}
-                  </span>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Last Updated</span>
-                  <div className="flex items-center space-x-1">
-                    <Calendar className="w-3 h-3" />
-                    <span>{app.lastUpdated}</span>
-                  </div>
+                <div className="text-center p-3 bg-gray-900 rounded-lg">
+                  <div className="text-2xl font-bold text-white">{app.secrets}</div>
+                  <div className="text-xs text-gray-400">Secrets</div>
                 </div>
               </div>
               
-              <Button 
-                variant="outline" 
-                className="w-full mt-4 border-gray-600 hover:bg-gray-700 text-white"
-              >
-                View Variables
-              </Button>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-400">Last updated</span>
+                <span className="text-white">{app.lastUpdated}</span>
+              </div>
             </CardContent>
           </Card>
         ))}

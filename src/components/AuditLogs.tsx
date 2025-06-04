@@ -1,62 +1,74 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Calendar, User, Activity, Search, Filter, Download } from "lucide-react";
 
 export const AuditLogs = () => {
   const auditLogs = [
     {
       id: "1",
-      action: "Environment Variable Updated",
+      action: "Secret Updated",
       details: "DATABASE_URL updated in Production environment for Frontend App",
       user: "John Doe",
       timestamp: "2024-01-15 14:30:22",
       type: "update",
+      project: "Frontend App",
+      environment: "Production",
     },
     {
       id: "2",
-      action: "User Invited",
+      action: "Team Member Invited",
       details: "Invited developer@example.com with Developer role",
       user: "Jane Smith",
       timestamp: "2024-01-15 13:45:10",
       type: "create",
+      project: "All Projects",
+      environment: "N/A",
     },
     {
       id: "3",
-      action: "Application Created",
-      details: "Created new application: Mobile App",
+      action: "Project Created",
+      details: "Created new project: Mobile App",
       user: "Admin",
       timestamp: "2024-01-15 12:15:33",
       type: "create",
+      project: "Mobile App",
+      environment: "N/A",
     },
     {
       id: "4",
-      action: "Environment Variable Deleted",
+      action: "Secret Deleted",
       details: "Removed LEGACY_API_KEY from Staging environment",
       user: "John Doe",
       timestamp: "2024-01-15 11:20:45",
       type: "delete",
+      project: "Backend API",
+      environment: "Staging",
     },
     {
       id: "5",
-      action: "User Role Changed",
+      action: "Role Changed",
       details: "Changed Bob Wilson's role from Viewer to Developer",
       user: "Jane Smith",
       timestamp: "2024-01-15 10:30:12",
       type: "update",
+      project: "All Projects",
+      environment: "N/A",
     },
   ];
 
   const getActionBadgeColor = (type: string) => {
     switch (type) {
       case "create":
-        return "bg-green-900 text-green-300";
+        return "bg-green-900 text-green-300 border-green-800";
       case "update":
-        return "bg-blue-900 text-blue-300";
+        return "bg-electric_indigo-900 text-electric_indigo-300 border-electric_indigo-800";
       case "delete":
-        return "bg-red-900 text-red-300";
+        return "bg-red-900 text-red-300 border-red-800";
       default:
-        return "bg-gray-700 text-gray-300";
+        return "bg-gray-700 text-gray-300 border-gray-600";
     }
   };
 
@@ -75,72 +87,112 @@ export const AuditLogs = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Audit Logs</h1>
-        <p className="text-gray-400 mt-2">
-          Track all activities and changes in your organization
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Activity</h1>
+          <p className="text-gray-400 mt-2">
+            Track all activities and changes in your workspace
+          </p>
+        </div>
+        <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-700">
+          <Download className="w-4 h-4 mr-2" />
+          Export
+        </Button>
       </div>
 
-      <div className="flex flex-wrap gap-4">
-        <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500">
-          <option>All Actions</option>
-          <option>Creates</option>
-          <option>Updates</option>
-          <option>Deletes</option>
-        </select>
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              placeholder="Search activity..."
+              className="pl-10 bg-gray-800 border-gray-700 focus:border-electric_indigo-500 text-white placeholder-gray-400"
+            />
+          </div>
+        </div>
         
-        <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500">
-          <option>All Users</option>
-          <option>John Doe</option>
-          <option>Jane Smith</option>
-          <option>Admin</option>
-        </select>
-        
-        <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500">
-          <option>Last 24 hours</option>
-          <option>Last 7 days</option>
-          <option>Last 30 days</option>
-          <option>Custom range</option>
-        </select>
+        <div className="flex gap-2">
+          <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
+            <option>All Actions</option>
+            <option>Creates</option>
+            <option>Updates</option>
+            <option>Deletes</option>
+          </select>
+          
+          <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
+            <option>All Users</option>
+            <option>John Doe</option>
+            <option>Jane Smith</option>
+            <option>Admin</option>
+          </select>
+          
+          <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
+            <option>Last 24 hours</option>
+            <option>Last 7 days</option>
+            <option>Last 30 days</option>
+            <option>Custom range</option>
+          </select>
+
+          <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-700">
+            <Filter className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle>Activity Timeline</CardTitle>
+          <CardTitle className="text-white">Activity Timeline</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {auditLogs.map((log) => (
-              <div 
-                key={log.id}
-                className="flex items-start space-x-4 p-4 bg-gray-900 rounded-lg border border-gray-700"
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getActionBadgeColor(log.type)}`}>
-                  {getActionIcon(log.type)}
-                </div>
-                
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">{log.action}</h3>
-                    <Badge className={getActionBadgeColor(log.type)}>
-                      {log.type}
-                    </Badge>
-                  </div>
-                  <p className="text-gray-400 text-sm mt-1">{log.details}</p>
-                  <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                    <div className="flex items-center space-x-1">
-                      <User className="w-3 h-3" />
-                      <span>{log.user}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="w-3 h-3" />
-                      <span>{log.timestamp}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Event</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Project</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Environment</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">User</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Time</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {auditLogs.map((log) => (
+                  <tr key={log.id} className="border-b border-gray-700 hover:bg-gray-750">
+                    <td className="py-4 px-4">
+                      <div>
+                        <h3 className="font-medium text-white">{log.action}</h3>
+                        <p className="text-gray-400 text-sm mt-1">{log.details}</p>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm text-gray-300">{log.project}</span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm text-gray-300">{log.environment}</span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center space-x-2">
+                        <User className="w-3 h-3 text-gray-400" />
+                        <span className="text-sm text-gray-300">{log.user}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-3 h-3 text-gray-400" />
+                        <span className="text-sm text-gray-400">{log.timestamp}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <Badge className={`${getActionBadgeColor(log.type)} border`}>
+                        <span className="mr-1">{getActionIcon(log.type)}</span>
+                        {log.type}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
