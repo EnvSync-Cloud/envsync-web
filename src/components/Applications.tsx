@@ -9,9 +9,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NewProjectModal } from "./NewProjectModal";
+import { ProjectEnvironments } from "./ProjectEnvironments";
 
 export const Applications = () => {
-  const [applications] = useState([
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [applications, setApplications] = useState([
     {
       id: "app_1",
       name: "Frontend App",
@@ -50,6 +54,32 @@ export const Applications = () => {
     },
   ]);
 
+  const handleCreateProject = (project: { name: string; description: string }) => {
+    const newProject = {
+      id: `app_${applications.length + 1}`,
+      name: project.name,
+      description: project.description,
+      configs: 0,
+      secrets: 0,
+      lastUpdated: "Just now",
+      status: "active",
+    };
+    setApplications([...applications, newProject]);
+  };
+
+  const handleProjectClick = (projectName: string) => {
+    setSelectedProject(projectName);
+  };
+
+  if (selectedProject) {
+    return (
+      <ProjectEnvironments
+        projectName={selectedProject}
+        onBack={() => setSelectedProject(null)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -59,7 +89,10 @@ export const Applications = () => {
             Manage your applications and their configurations
           </p>
         </div>
-        <Button className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white">
+        <Button 
+          onClick={() => setShowNewProjectModal(true)}
+          className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
+        >
           <Plus className="w-4 h-4 mr-2" />
           Create Project
         </Button>
@@ -70,7 +103,7 @@ export const Applications = () => {
           <Card key={app.id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors group cursor-pointer">
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3" onClick={() => handleProjectClick(app.name)}>
                   <div className="w-12 h-12 bg-gradient-to-br from-electric_indigo-500 to-violet-500 rounded-xl flex items-center justify-center">
                     <Database className="w-6 h-6 text-white" />
                   </div>
@@ -110,7 +143,7 @@ export const Applications = () => {
                 </DropdownMenu>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent onClick={() => handleProjectClick(app.name)}>
               <p className="text-gray-400 text-sm mb-6">{app.description}</p>
               
               <div className="grid grid-cols-2 gap-4 mb-6">
@@ -132,6 +165,12 @@ export const Applications = () => {
           </Card>
         ))}
       </div>
+
+      <NewProjectModal
+        isOpen={showNewProjectModal}
+        onClose={() => setShowNewProjectModal(false)}
+        onCreateProject={handleCreateProject}
+      />
     </div>
   );
 };

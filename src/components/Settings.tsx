@@ -1,17 +1,30 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building, Globe, Users, Shield, Key, Bell, Trash2 } from "lucide-react";
+import { User, Shield, Key, Bell, Trash2 } from "lucide-react";
+import { TwoFactorModal } from "./TwoFactorModal";
 
 export const Settings = () => {
+  const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+
+  const handleEnableTwoFactor = () => {
+    setShowTwoFactorModal(true);
+  };
+
+  const handleDisableTwoFactor = () => {
+    setTwoFactorEnabled(false);
+  };
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-white">Workspace Settings</h1>
+        <h1 className="text-3xl font-bold text-white">Account Settings</h1>
         <p className="text-gray-400 mt-2">
-          Manage your workspace configuration and preferences
+          Manage your account configuration and preferences
         </p>
       </div>
 
@@ -19,32 +32,32 @@ export const Settings = () => {
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
             <div className="flex items-center space-x-2">
-              <Building className="w-5 h-5 text-electric_indigo-500" />
-              <CardTitle className="text-white">Workspace Details</CardTitle>
+              <User className="w-5 h-5 text-electric_indigo-500" />
+              <CardTitle className="text-white">Profile Information</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="workspace-name" className="text-white">Workspace Name</Label>
+              <Label htmlFor="full-name" className="text-white">Full Name</Label>
               <Input
-                id="workspace-name"
-                defaultValue="Personal Workspace"
+                id="full-name"
+                defaultValue="John Doe"
                 className="bg-gray-900 border-gray-700 text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="workspace-slug" className="text-white">Workspace Slug</Label>
+              <Label htmlFor="email" className="text-white">Email Address</Label>
               <Input
-                id="workspace-slug"
-                defaultValue="personal-workspace"
+                id="email"
+                defaultValue="john@example.com"
                 className="bg-gray-900 border-gray-700 text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="workspace-description" className="text-white">Description</Label>
+              <Label htmlFor="company" className="text-white">Company</Label>
               <Input
-                id="workspace-description"
-                placeholder="Describe your workspace..."
+                id="company"
+                placeholder="Enter your company name"
                 className="bg-gray-900 border-gray-700 text-white"
               />
             </div>
@@ -66,12 +79,26 @@ export const Settings = () => {
               <div>
                 <h4 className="font-medium text-white">Two-Factor Authentication</h4>
                 <p className="text-sm text-gray-400">
-                  Add an extra layer of security
+                  {twoFactorEnabled ? "2FA is enabled on your account" : "Add an extra layer of security"}
                 </p>
               </div>
-              <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-700">
-                Enable
-              </Button>
+              {twoFactorEnabled ? (
+                <Button 
+                  variant="destructive" 
+                  onClick={handleDisableTwoFactor}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Disable
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  onClick={handleEnableTwoFactor}
+                  className="border-gray-600 text-white hover:bg-gray-700"
+                >
+                  Enable
+                </Button>
+              )}
             </div>
             <div className="flex items-center justify-between">
               <div>
@@ -90,7 +117,7 @@ export const Settings = () => {
               <div>
                 <h4 className="font-medium text-white">Activity Logging</h4>
                 <p className="text-sm text-gray-400">
-                  Track all workspace activities
+                  Track all account activities
                 </p>
               </div>
               <span className="text-green-400 text-sm font-medium">Enabled</span>
@@ -107,7 +134,7 @@ export const Settings = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="api-key" className="text-white">Service Token</Label>
+              <Label htmlFor="api-key" className="text-white">Personal Access Token</Label>
               <div className="flex space-x-2">
                 <Input
                   id="api-key"
@@ -193,17 +220,25 @@ export const Settings = () => {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium text-white">Delete Workspace</h4>
+              <h4 className="font-medium text-white">Delete Account</h4>
               <p className="text-sm text-gray-400">
-                Permanently delete this workspace and all its data
+                Permanently delete your account and all associated data
               </p>
             </div>
             <Button variant="destructive" className="bg-red-600 hover:bg-red-700 text-white">
-              Delete Workspace
+              Delete Account
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      <TwoFactorModal
+        isOpen={showTwoFactorModal}
+        onClose={() => {
+          setShowTwoFactorModal(false);
+          setTwoFactorEnabled(true);
+        }}
+      />
     </div>
   );
 };

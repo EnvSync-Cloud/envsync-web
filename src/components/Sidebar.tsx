@@ -10,10 +10,9 @@ interface SidebarProps {
 const navigation = [
   { id: "dashboard", name: "Dashboard", icon: Home },
   { id: "applications", name: "Projects", icon: Database },
-  { id: "environments", name: "Configs", icon: FileText },
   { id: "users", name: "Team", icon: Users },
   { id: "audit", name: "Activity", icon: Activity },
-  { id: "settings", name: "Settings", icon: Settings },
+  { id: "settings", name: "Account", icon: Settings },
 ];
 
 export const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
@@ -50,11 +49,6 @@ export const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
       </nav>
       
       <div className="p-4 border-t border-gray-800">
-        <button className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors text-sm">
-          <Plus className="w-4 h-4" />
-          <span>New Project</span>
-        </button>
-        
         <div className="flex items-center space-x-3 mt-4">
           <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
             <span className="text-white text-xs font-medium">JD</span>

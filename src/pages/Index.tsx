@@ -4,7 +4,6 @@ import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { Dashboard } from "@/components/Dashboard";
 import { Applications } from "@/components/Applications";
-import { Environments } from "@/components/Environments";
 import { Users } from "@/components/Users";
 import { Settings } from "@/components/Settings";
 import { AuditLogs } from "@/components/AuditLogs";
@@ -18,8 +17,6 @@ const Index = () => {
         return <Dashboard />;
       case "applications":
         return <Applications />;
-      case "environments":
-        return <Environments />;
       case "users":
         return <Users />;
       case "settings":
