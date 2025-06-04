@@ -23,14 +23,14 @@ export const Dashboard = () => {
       value: "234",
       icon: Activity,
       change: "+18 this week",
-      color: "text-purple-500",
+      color: "text-electric_indigo-500",
     },
     {
       title: "Team Members",
       value: "8",
       icon: Users,
       change: "2 pending invites",
-      color: "text-orange-500",
+      color: "text-magenta-500",
     },
   ];
 
@@ -91,7 +91,7 @@ export const Dashboard = () => {
                 },
               ].map((activity, index) => (
                 <div key={index} className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                  <div className="w-2 h-2 bg-electric_indigo-500 rounded-full mt-2"></div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">{activity.action}</p>
                     <p className="text-xs text-gray-400">{activity.details}</p>
@@ -111,19 +111,19 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <button className="p-4 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors">
+              <button className="p-4 bg-electric_indigo-500 hover:bg-electric_indigo-600 rounded-lg transition-colors text-white">
                 <Database className="w-6 h-6 mb-2" />
                 <p className="text-sm font-medium">New App</p>
               </button>
-              <button className="p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+              <button className="p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white">
                 <FileText className="w-6 h-6 mb-2" />
                 <p className="text-sm font-medium">Environment</p>
               </button>
-              <button className="p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+              <button className="p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white">
                 <Users className="w-6 h-6 mb-2" />
                 <p className="text-sm font-medium">Invite User</p>
               </button>
-              <button className="p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+              <button className="p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white">
                 <Activity className="w-6 h-6 mb-2" />
                 <p className="text-sm font-medium">View Logs</p>
               </button>

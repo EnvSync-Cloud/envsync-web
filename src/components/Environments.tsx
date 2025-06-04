@@ -37,7 +37,7 @@ export const Environments = () => {
             Manage environment variables across different applications and environments
           </p>
         </div>
-        <Button className="bg-purple-600 hover:bg-purple-700">
+        <Button className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white">
           <Plus className="w-4 h-4 mr-2" />
           Add Variable
         </Button>
@@ -49,7 +49,7 @@ export const Environments = () => {
           <select 
             value={selectedApp}
             onChange={(e) => setSelectedApp(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500"
+            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500"
           >
             {apps.map(app => (
               <option key={app} value={app}>{app}</option>
@@ -62,7 +62,7 @@ export const Environments = () => {
           <select 
             value={selectedEnvType}
             onChange={(e) => setSelectedEnvType(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500"
+            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500"
           >
             {envTypes.map(env => (
               <option key={env} value={env}>{env}</option>
@@ -91,7 +91,7 @@ export const Environments = () => {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-3">
-                    <span className="font-mono font-medium text-purple-300">
+                    <span className="font-mono font-medium text-veronica-500">
                       {envVar.key}
                     </span>
                     {envVar.sensitive && (
@@ -104,7 +104,7 @@ export const Environments = () => {
                     <Input
                       value={showValues[envVar.key] ? envVar.value : maskValue(envVar.value)}
                       readOnly
-                      className="bg-gray-800 border-gray-600 font-mono text-sm"
+                      className="bg-gray-800 border-gray-600 font-mono text-sm text-white"
                     />
                   </div>
                 </div>
@@ -114,6 +114,7 @@ export const Environments = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => toggleValueVisibility(envVar.key)}
+                    className="text-white hover:bg-gray-700"
                   >
                     {showValues[envVar.key] ? (
                       <EyeOff className="w-4 h-4" />
@@ -121,13 +122,13 @@ export const Environments = () => {
                       <Eye className="w-4 h-4" />
                     )}
                   </Button>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-gray-700">
                     <Copy className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-gray-700">
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300">
+                  <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-gray-700">
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>

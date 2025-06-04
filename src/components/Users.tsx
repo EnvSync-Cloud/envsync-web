@@ -76,7 +76,7 @@ export const Users = () => {
             Manage your organization's team members and their permissions
           </p>
         </div>
-        <Button className="bg-purple-600 hover:bg-purple-700">
+        <Button className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white">
           <Plus className="w-4 h-4 mr-2" />
           Invite User
         </Button>
@@ -94,7 +94,7 @@ export const Users = () => {
                 className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700"
               >
                 <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-electric_indigo-500 to-magenta-500 rounded-full flex items-center justify-center">
                     <span className="text-white font-medium text-sm">{user.avatar}</span>
                   </div>
                   <div>
@@ -123,7 +123,7 @@ export const Users = () => {
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" className="text-white hover:bg-gray-700">
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>

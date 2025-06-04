@@ -21,7 +21,7 @@ export const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
     <div className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
       <div className="p-6">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-magenta-500 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-lg">E</span>
           </div>
           <span className="text-xl font-bold">EnvSync</span>
@@ -38,7 +38,7 @@ export const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
               className={cn(
                 "w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors",
                 activeView === item.id
-                  ? "bg-purple-600 text-white"
+                  ? "bg-electric_indigo-500 text-white"
                   : "text-gray-300 hover:bg-gray-800 hover:text-white"
               )}
             >

@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Building, Globe, Users, Shield } from "lucide-react";
 
 export const Settings = () => {
@@ -20,7 +19,7 @@ export const Settings = () => {
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
             <div className="flex items-center space-x-2">
-              <Building className="w-5 h-5 text-purple-500" />
+              <Building className="w-5 h-5 text-electric_indigo-500" />
               <CardTitle>Organization Details</CardTitle>
             </div>
           </CardHeader>
@@ -30,7 +29,7 @@ export const Settings = () => {
               <Input
                 id="org-name"
                 defaultValue="My Organization"
-                className="bg-gray-900 border-gray-700"
+                className="bg-gray-900 border-gray-700 text-white"
               />
             </div>
             <div className="space-y-2">
@@ -38,7 +37,7 @@ export const Settings = () => {
               <Input
                 id="org-slug"
                 defaultValue="my-organization"
-                className="bg-gray-900 border-gray-700"
+                className="bg-gray-900 border-gray-700 text-white"
               />
             </div>
             <div className="space-y-2">
@@ -46,10 +45,10 @@ export const Settings = () => {
               <Input
                 id="org-website"
                 defaultValue="https://example.com"
-                className="bg-gray-900 border-gray-700"
+                className="bg-gray-900 border-gray-700 text-white"
               />
             </div>
-            <Button className="bg-purple-600 hover:bg-purple-700">
+            <Button className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white">
               Save Changes
             </Button>
           </CardContent>
@@ -58,7 +57,7 @@ export const Settings = () => {
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
             <div className="flex items-center space-x-2">
-              <Shield className="w-5 h-5 text-purple-500" />
+              <Shield className="w-5 h-5 text-electric_indigo-500" />
               <CardTitle>Security Settings</CardTitle>
             </div>
           </CardHeader>
@@ -70,7 +69,7 @@ export const Settings = () => {
                   Add an extra layer of security to your account
                 </p>
               </div>
-              <Button variant="outline" className="border-gray-600">
+              <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-700">
                 Enable
               </Button>
             </div>
@@ -81,7 +80,7 @@ export const Settings = () => {
                   Automatically log out inactive users
                 </p>
               </div>
-              <select className="bg-gray-900 border border-gray-700 rounded px-3 py-1">
+              <select className="bg-gray-900 border border-gray-700 rounded px-3 py-1 text-white">
                 <option>24 hours</option>
                 <option>1 week</option>
                 <option>1 month</option>
@@ -102,7 +101,7 @@ export const Settings = () => {
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
             <div className="flex items-center space-x-2">
-              <Globe className="w-5 h-5 text-purple-500" />
+              <Globe className="w-5 h-5 text-electric_indigo-500" />
               <CardTitle>API Settings</CardTitle>
             </div>
           </CardHeader>
@@ -114,9 +113,9 @@ export const Settings = () => {
                   id="api-key"
                   value="sk_live_••••••••••••••••••••••••••••••••"
                   readOnly
-                  className="bg-gray-900 border-gray-700"
+                  className="bg-gray-900 border-gray-700 text-white"
                 />
-                <Button variant="outline" className="border-gray-600">
+                <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-700">
                   Regenerate
                 </Button>
               </div>
@@ -126,10 +125,10 @@ export const Settings = () => {
               <Input
                 id="webhook-url"
                 placeholder="https://your-app.com/webhooks/envsync"
-                className="bg-gray-900 border-gray-700"
+                className="bg-gray-900 border-gray-700 text-white"
               />
             </div>
-            <Button className="bg-purple-600 hover:bg-purple-700">
+            <Button className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white">
               Save API Settings
             </Button>
           </CardContent>
@@ -138,7 +137,7 @@ export const Settings = () => {
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
             <div className="flex items-center space-x-2">
-              <Users className="w-5 h-5 text-purple-500" />
+              <Users className="w-5 h-5 text-electric_indigo-500" />
               <CardTitle>Team Preferences</CardTitle>
             </div>
           </CardHeader>
@@ -152,7 +151,7 @@ export const Settings = () => {
               </div>
               <Input
                 placeholder="@example.com"
-                className="w-32 bg-gray-900 border-gray-700"
+                className="w-32 bg-gray-900 border-gray-700 text-white"
               />
             </div>
             <div className="flex items-center justify-between">
@@ -162,13 +161,13 @@ export const Settings = () => {
                   Default role for new team members
                 </p>
               </div>
-              <select className="bg-gray-900 border border-gray-700 rounded px-3 py-1">
+              <select className="bg-gray-900 border border-gray-700 rounded px-3 py-1 text-white">
                 <option>Viewer</option>
                 <option>Developer</option>
                 <option>Admin</option>
               </select>
             </div>
-            <Button className="bg-purple-600 hover:bg-purple-700">
+            <Button className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white">
               Save Preferences
             </Button>
           </CardContent>

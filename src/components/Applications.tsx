@@ -47,7 +47,7 @@ export const Applications = () => {
             Manage your applications and their environment variables
           </p>
         </div>
-        <Button className="bg-purple-600 hover:bg-purple-700">
+        <Button className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white">
           <Plus className="w-4 h-4 mr-2" />
           New Application
         </Button>
@@ -59,7 +59,7 @@ export const Applications = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Database className="w-5 h-5 text-purple-500" />
+                  <Database className="w-5 h-5 text-violet-500" />
                   <CardTitle className="text-lg">{app.name}</CardTitle>
                 </div>
                 <DropdownMenu>
@@ -107,7 +107,7 @@ export const Applications = () => {
               
               <Button 
                 variant="outline" 
-                className="w-full mt-4 border-gray-600 hover:bg-gray-700"
+                className="w-full mt-4 border-gray-600 hover:bg-gray-700 text-white"
               >
                 View Variables
               </Button>
