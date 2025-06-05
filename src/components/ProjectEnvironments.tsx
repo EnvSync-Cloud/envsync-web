@@ -1,17 +1,37 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, Eye, EyeOff, Copy, Edit, Trash2, Search } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  Eye,
+  EyeOff,
+  Copy,
+  Edit,
+  Trash2,
+  Search,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { cn } from "@/lib/utils";
 
 interface ProjectEnvironmentsProps {
   projectName: string;
   onBack: () => void;
 }
 
-export const ProjectEnvironments = ({ projectName, onBack }: ProjectEnvironmentsProps) => {
+export const ProjectEnvironments = ({
+  projectName,
+  onBack,
+}: ProjectEnvironmentsProps) => {
+  const [searchEnv, setSearchEnv] = useState("");
   const [selectedEnv, setSelectedEnv] = useState("development");
   const [searchQuery, setSearchQuery] = useState("");
   const [showValues, setShowValues] = useState<Record<string, boolean>>({});
@@ -24,19 +44,31 @@ export const ProjectEnvironments = ({ projectName, onBack }: ProjectEnvironments
 
   const envVars = {
     development: [
-      { key: "DATABASE_URL", value: "postgresql://localhost:5432/app_dev", sensitive: true },
+      {
+        key: "DATABASE_URL",
+        value: "postgresql://localhost:5432/app_dev",
+        sensitive: true,
+      },
       { key: "API_KEY", value: "pk_test_123", sensitive: true },
       { key: "NODE_ENV", value: "development", sensitive: false },
       { key: "PORT", value: "3000", sensitive: false },
     ],
     staging: [
-      { key: "DATABASE_URL", value: "postgresql://staging-db:5432/app", sensitive: true },
+      {
+        key: "DATABASE_URL",
+        value: "postgresql://staging-db:5432/app",
+        sensitive: true,
+      },
       { key: "API_KEY", value: "pk_staging_456", sensitive: true },
       { key: "NODE_ENV", value: "staging", sensitive: false },
       { key: "PORT", value: "3000", sensitive: false },
     ],
     production: [
-      { key: "DATABASE_URL", value: "postgresql://prod-db:5432/app", sensitive: true },
+      {
+        key: "DATABASE_URL",
+        value: "postgresql://prod-db:5432/app",
+        sensitive: true,
+      },
       { key: "API_KEY", value: "pk_live_789", sensitive: true },
       { key: "NODE_ENV", value: "production", sensitive: false },
       { key: "PORT", value: "8080", sensitive: false },
@@ -44,12 +76,12 @@ export const ProjectEnvironments = ({ projectName, onBack }: ProjectEnvironments
   };
 
   const currentEnvVars = envVars[selectedEnv as keyof typeof envVars] || [];
-  const filteredVars = currentEnvVars.filter(envVar =>
+  const filteredVars = currentEnvVars.filter((envVar) =>
     envVar.key.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const toggleValueVisibility = (key: string) => {
-    setShowValues(prev => ({ ...prev, [key]: !prev[key] }));
+    setShowValues((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const maskValue = (value: string) => "•".repeat(Math.min(value.length, 20));
@@ -79,21 +111,42 @@ export const ProjectEnvironments = ({ projectName, onBack }: ProjectEnvironments
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex space-x-2">
-          {environments.map((env) => (
-            <Button
-              key={env.id}
-              variant={selectedEnv === env.id ? "default" : "outline"}
-              onClick={() => setSelectedEnv(env.id)}
-              className={
-                selectedEnv === env.id
-                  ? "bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
-                  : "border-gray-600 text-white hover:bg-gray-700"
-              }
-            >
-              <div className={`w-2 h-2 rounded-full ${env.color} mr-2`} />
-              {env.name}
-            </Button>
-          ))}
+          <Select value={selectedEnv} onValueChange={setSelectedEnv}>
+            <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
+              <SelectValue placeholder="Select environment" />
+            </SelectTrigger>
+            <SelectContent className="bg-gray-800 p-1 border-gray-700 text-white">
+              <Input
+                placeholder="Search environments..."
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 mb-2"
+                onChange={(e) => setSearchEnv(e.target.value)}
+              />
+              {environments.map((env) => {
+                const isHidden = !env.name
+                  .toLowerCase()
+                  .includes(searchEnv.trim().toLowerCase());
+
+                return (
+                  <SelectItem
+                    hideCheck={true}
+                    key={env.id}
+                    value={env.id}
+                    className={cn(
+                      "focus:bg-gray-700",
+                      isHidden ? "hidden" : ""
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <div
+                        className={`w-2 h-2 rounded-full ${env.color} mr-2`}
+                      />
+                      {env.name}
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex-1">
@@ -113,7 +166,8 @@ export const ProjectEnvironments = ({ projectName, onBack }: ProjectEnvironments
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-white">
-              {environments.find(env => env.id === selectedEnv)?.name} Environment
+              {environments.find((env) => env.id === selectedEnv)?.name}{" "}
+              Environment
             </CardTitle>
             <Badge variant="secondary" className="bg-gray-700 text-white">
               {filteredVars.length} secrets
@@ -123,7 +177,10 @@ export const ProjectEnvironments = ({ projectName, onBack }: ProjectEnvironments
         <CardContent>
           <div className="space-y-4">
             {filteredVars.map((envVar) => (
-              <div key={envVar.key} className="flex items-center justify-between p-4 bg-gray-900 rounded-lg">
+              <div
+                key={envVar.key}
+                className="flex items-center justify-between p-4 bg-gray-900 rounded-lg"
+              >
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
                     <span className="font-mono font-medium text-electric_indigo-400">
@@ -137,7 +194,11 @@ export const ProjectEnvironments = ({ projectName, onBack }: ProjectEnvironments
                   </div>
                   <div className="flex items-center space-x-2">
                     <Input
-                      value={showValues[envVar.key] ? envVar.value : maskValue(envVar.value)}
+                      value={
+                        showValues[envVar.key]
+                          ? envVar.value
+                          : maskValue(envVar.value)
+                      }
                       readOnly
                       className="bg-gray-800 border-gray-700 font-mono text-sm text-white"
                     />
@@ -156,13 +217,25 @@ export const ProjectEnvironments = ({ projectName, onBack }: ProjectEnvironments
                   </div>
                 </div>
                 <div className="flex items-center space-x-1 ml-4">
-                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-gray-400 hover:text-white hover:bg-gray-700"
+                  >
                     <Copy className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-gray-400 hover:text-white hover:bg-gray-700"
+                  >
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-gray-700">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-400 hover:text-red-300 hover:bg-gray-700"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
