@@ -2,8 +2,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Database, Users, FileText, Activity, Plus, ArrowRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { WhoAmIResponse } from "@envsync-cloud/envsync-ts-sdk";
 
-export const Dashboard = () => {
+export const Dashboard = (
+  {
+      whoami
+  }: {
+    whoami: WhoAmIResponse
+  }
+) => {
   const stats = [
     {
       title: "Projects",
@@ -45,7 +53,7 @@ export const Dashboard = () => {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Welcome back, John</h1>
+          <h1 className="text-3xl font-bold text-white">Welcome back, {whoami.user.full_name}</h1>
           <p className="text-gray-400 mt-2">
             Here's what's happening with your projects and environments.
           </p>

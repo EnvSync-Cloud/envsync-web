@@ -7,14 +7,28 @@ import { Applications } from "@/components/Applications";
 import { Users } from "@/components/Users";
 import { Settings } from "@/components/Settings";
 import { AuditLogs } from "@/components/AuditLogs";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const [activeView, setActiveView] = useState("dashboard");
+  const {user, isAuthenticated, isLoading} = useAuth()
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen text-white">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <div className="flex items-center justify-center h-screen text-white">You are not authenticated.</div>;
+  }
+
+  if (!user) {
+    return <div className="flex items-center justify-center h-screen text-white">User data not available.</div>;
+  }
 
   const renderActiveView = () => {
     switch (activeView) {
       case "dashboard":
-        return <Dashboard />;
+        return <Dashboard whoami={user} />;
       case "applications":
         return <Applications />;
       case "users":
@@ -24,7 +38,7 @@ const Index = () => {
       case "audit":
         return <AuditLogs />;
       default:
-        return <Dashboard />;
+        return <Dashboard whoami={user} />;
     }
   };
 
