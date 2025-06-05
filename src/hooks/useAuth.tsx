@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { EnvSyncAPISDK, type WhoAmIResponse } from '@envsync-cloud/envsync-ts-sdk';
-import { redirect } from 'react-router-dom';
 
 export const useAuth = () => {
     const [user, setUser] = useState<WhoAmIResponse | undefined>(
@@ -55,5 +54,6 @@ export const useAuth = () => {
         user: user ?? null,
         isLoading,
         isAuthenticated,
+        api
     };
 };

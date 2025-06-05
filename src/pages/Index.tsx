@@ -8,10 +8,18 @@ import { Users } from "@/components/Users";
 import { Settings } from "@/components/Settings";
 import { AuditLogs } from "@/components/AuditLogs";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 
 const Index = () => {
   const [activeView, setActiveView] = useState("dashboard");
-  const {user, isAuthenticated, isLoading} = useAuth()
+  const {user, isAuthenticated, isLoading, api} = useAuth()
+
+  const { isPending, error, data } = useQuery({
+    queryKey: ['applications'],
+    enabled: isAuthenticated,
+    queryFn: () =>
+      api.applications.getApps(),
+  })
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen text-white">Loading...</div>;
