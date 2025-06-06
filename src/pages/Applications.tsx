@@ -1,16 +1,22 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Database, MoreHorizontal, Settings, Copy, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Database,
+  MoreHorizontal,
+  Settings,
+  Copy,
+  Trash2,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { NewProjectModal } from "./NewProjectModal";
-import { ProjectEnvironments } from "./ProjectEnvironments";
+import { NewProjectModal } from "@/components/NewProjectModal";
+import { ProjectEnvironments } from "@/components/ProjectEnvironments";
 
 export const Applications = () => {
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
@@ -54,7 +60,10 @@ export const Applications = () => {
     },
   ]);
 
-  const handleCreateProject = (project: { name: string; description: string }) => {
+  const handleCreateProject = (project: {
+    name: string;
+    description: string;
+  }) => {
     const newProject = {
       id: `app_${applications.length + 1}`,
       name: project.name,
@@ -89,7 +98,7 @@ export const Applications = () => {
             Manage your applications and their configurations
           </p>
         </div>
-        <Button 
+        <Button
           onClick={() => setShowNewProjectModal(true)}
           className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
         >
@@ -100,21 +109,31 @@ export const Applications = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {applications.map((app) => (
-          <Card key={app.id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors group cursor-pointer">
+          <Card
+            key={app.id}
+            className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors group cursor-pointer"
+          >
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3" onClick={() => handleProjectClick(app.name)}>
+                <div
+                  className="flex items-center space-x-3"
+                  onClick={() => handleProjectClick(app.name)}
+                >
                   <div className="w-12 h-12 bg-gradient-to-br from-electric_indigo-500 to-violet-500 rounded-xl flex items-center justify-center">
                     <Database className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg text-white">{app.name}</CardTitle>
+                    <CardTitle className="text-lg text-white">
+                      {app.name}
+                    </CardTitle>
                     <div className="flex items-center space-x-2 mt-1">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        app.status === 'active' 
-                          ? 'bg-green-900 text-green-300' 
-                          : 'bg-gray-700 text-gray-300'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          app.status === "active"
+                            ? "bg-green-900 text-green-300"
+                            : "bg-gray-700 text-gray-300"
+                        }`}
+                      >
                         {app.status}
                       </span>
                     </div>
@@ -122,7 +141,11 @@ export const Applications = () => {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity text-white hover:bg-gray-700">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-white hover:bg-gray-700"
+                    >
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -145,18 +168,22 @@ export const Applications = () => {
             </CardHeader>
             <CardContent onClick={() => handleProjectClick(app.name)}>
               <p className="text-gray-400 text-sm mb-6">{app.description}</p>
-              
+
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="text-center p-3 bg-gray-900 rounded-lg">
-                  <div className="text-2xl font-bold text-white">{app.configs}</div>
+                  <div className="text-2xl font-bold text-white">
+                    {app.configs}
+                  </div>
                   <div className="text-xs text-gray-400">Configs</div>
                 </div>
                 <div className="text-center p-3 bg-gray-900 rounded-lg">
-                  <div className="text-2xl font-bold text-white">{app.secrets}</div>
+                  <div className="text-2xl font-bold text-white">
+                    {app.secrets}
+                  </div>
                   <div className="text-xs text-gray-400">Secrets</div>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-400">Last updated</span>
                 <span className="text-white">{app.lastUpdated}</span>
@@ -174,3 +201,5 @@ export const Applications = () => {
     </div>
   );
 };
+
+export default Applications;
