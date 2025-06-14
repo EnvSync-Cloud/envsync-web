@@ -83,7 +83,7 @@ export const AuditLogs = () => {
         </div>
         <Button
           variant="outline"
-          className="border-gray-600 text-white hover:bg-gray-700"
+          className="border-gray-600 text-white hover:bg-gray-700 rounded-xl"
         >
           <Download className="w-4 h-4 mr-2" />
           Export
@@ -96,27 +96,27 @@ export const AuditLogs = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
               placeholder="Search activity..."
-              className="pl-10 bg-gray-800 border-gray-700 focus:border-electric_indigo-500 text-white placeholder-gray-400"
+              className="pl-10 bg-gray-800 border-gray-700 focus:border-electric_indigo-500 text-white placeholder-gray-400 rounded-xl"
             />
           </div>
         </div>
 
         <div className="flex gap-2">
-          <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
+          <select className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
             <option>All Actions</option>
             <option>Creates</option>
             <option>Updates</option>
             <option>Deletes</option>
           </select>
 
-          <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
+          <select className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
             <option>All Users</option>
             <option>John Doe</option>
             <option>Jane Smith</option>
             <option>Admin</option>
           </select>
 
-          <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
+          <select className="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
             <option>Last 24 hours</option>
             <option>Last 7 days</option>
             <option>Last 30 days</option>
@@ -125,14 +125,14 @@ export const AuditLogs = () => {
 
           <Button
             variant="outline"
-            className="border-gray-600 text-white hover:bg-gray-700"
+            className="border-gray-600 text-white hover:bg-gray-700 rounded-xl"
           >
             <Filter className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
-      <Card className="bg-gray-800 border-gray-700">
+      <Card className="bg-gray-800 border-gray-700 rounded-xl">
         <CardHeader>
           <CardTitle className="text-white">Activity Timeline</CardTitle>
         </CardHeader>

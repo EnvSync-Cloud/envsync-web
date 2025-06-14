@@ -25,7 +25,7 @@ export const Sidebar = () => {
     <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
       <div className="p-6">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-xl flex items-center justify-center">
             <span className="text-white font-bold text-lg">E</span>
           </div>
           <span className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">EnvSync</span>
@@ -40,7 +40,7 @@ export const Sidebar = () => {
               key={item.id}
               to={`/${item.id}`}
               className={cn(
-                "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-left transition-colors text-sm font-medium",
+                "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-left transition-colors text-sm font-medium",
                 activeView === item.id
                   ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
                   : "text-slate-300 hover:bg-slate-700 hover:text-white"
@@ -55,12 +55,12 @@ export const Sidebar = () => {
 
       <div className="p-4 border-t border-slate-700">
         <div className="flex items-center space-x-3 mt-4">
-          <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-slate-700 rounded-xl flex items-center justify-center">
             {user.user.profile_picture_url ? (
               <img
                 src={user.user.profile_picture_url}
                 alt="User Avatar"
-                className="w-full h-full rounded-full object-cover"
+                className="w-full h-full rounded-xl object-cover"
               />
             ) : (
               <span className="text-white font-semibold text-sm">

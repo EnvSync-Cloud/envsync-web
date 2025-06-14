@@ -92,7 +92,7 @@ export const Applications = () => {
         <p>No projects found. Create a new project to get started.</p>
         <Button
           onClick={() => setShowNewProjectModal(true)}
-          className="mt-4 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+          className="mt-4 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 rounded-xl"
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Project
@@ -121,7 +121,7 @@ export const Applications = () => {
         </div>
         <Button
           onClick={() => setShowNewProjectModal(true)}
-          className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+          className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 rounded-xl"
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Project
@@ -132,7 +132,7 @@ export const Applications = () => {
         {applications.map((app) => (
           <Card
             key={app.id}
-            className="bg-slate-800 border-slate-700 hover:bg-slate-750 transition-colors group cursor-pointer hover:shadow-lg hover:shadow-emerald-500/5"
+            className="bg-slate-800 border-slate-700 hover:bg-slate-750 transition-colors group cursor-pointer hover:shadow-lg hover:shadow-emerald-500/5 rounded-xl"
           >
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -149,7 +149,7 @@ export const Applications = () => {
                     </CardTitle>
                     <div className="flex items-center space-x-2 mt-1">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs ${
+                        className={`px-2 py-1 rounded-xl text-xs ${
                           app.status === "active"
                             ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                             : "bg-slate-700 text-slate-300 border border-slate-600"
@@ -165,18 +165,18 @@ export const Applications = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-white hover:bg-slate-700"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-white hover:bg-slate-700 rounded-xl"
                     >
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-slate-800 border-slate-700">
-                    <DropdownMenuItem className="text-red-400 hover:bg-slate-700">
+                  <DropdownMenuContent className="bg-slate-800 border-slate-700 rounded-xl">
+                    <DropdownMenuItem className="text-red-400 hover:bg-slate-700 rounded-xl">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteProject(app.id)}
-                        className="w-full text-left"
+                        className="w-full text-left rounded-xl"
                         disabled={deleteProject.isPending}
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
@@ -191,13 +191,13 @@ export const Applications = () => {
               <p className="text-slate-400 text-sm mb-6">{app.description}</p>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="text-center p-3 bg-slate-900 rounded-lg border border-slate-700">
+                <div className="text-center p-3 bg-slate-900 rounded-xl border border-slate-700">
                   <div className="text-2xl font-bold text-white">
                     0
                   </div>
                   <div className="text-xs text-slate-400">Configs</div>
                 </div>
-                <div className="text-center p-3 bg-slate-900 rounded-lg border border-slate-700">
+                <div className="text-center p-3 bg-slate-900 rounded-xl border border-slate-700">
                   <div className="text-2xl font-bold text-white">
                     0
                   </div>

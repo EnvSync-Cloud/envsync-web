@@ -55,7 +55,7 @@ export const NewProjectModal = ({ isOpen, onClose }: NewProjectModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-800 border-slate-700 text-white">
+      <DialogContent className="bg-slate-800 border-slate-700 text-white rounded-xl">
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
         </DialogHeader>
@@ -67,7 +67,7 @@ export const NewProjectModal = ({ isOpen, onClose }: NewProjectModalProps) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter project name"
-              className="bg-slate-900 border-slate-700 text-white focus:border-emerald-500 focus:ring-emerald-500/20"
+              className="bg-slate-900 border-slate-700 text-white focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl"
               required
             />
           </div>
@@ -78,7 +78,7 @@ export const NewProjectModal = ({ isOpen, onClose }: NewProjectModalProps) => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe your project"
-              className="bg-slate-900 border-slate-700 text-white focus:border-emerald-500 focus:ring-emerald-500/20"
+              className="bg-slate-900 border-slate-700 text-white focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl"
               rows={3}
             />
           </div>
@@ -87,13 +87,13 @@ export const NewProjectModal = ({ isOpen, onClose }: NewProjectModalProps) => {
               type="button" 
               variant="outline" 
               onClick={onClose} 
-              className="border-slate-600 text-white hover:bg-slate-700"
+              className="border-slate-600 text-white hover:bg-slate-700 rounded-xl"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 rounded-xl"
               disabled={createProject.isPending}
               onClick={handleSubmit}
             >

@@ -13,10 +13,10 @@ export const Header = () => {
             <img 
               src={user.org.logo_url} 
               alt={`${user.org.name} logo`}
-              className="w-8 h-8 rounded-lg object-cover"
+              className="w-8 h-8 rounded-xl object-cover"
             />
           ) : (
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-xl flex items-center justify-center">
               <span className="text-white font-semibold text-sm">
                 {user?.org?.name?.charAt(0)?.toUpperCase() || 'O'}
               </span>
