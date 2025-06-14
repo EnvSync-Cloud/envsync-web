@@ -1,63 +1,50 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, User, Activity, Search, Filter, Download } from "lucide-react";
+import { Calendar, User, Search, Filter, Download } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+
+type AuditLog = {
+  id: string;
+  action: string;
+  details: string;
+  user: string;
+  timestamp: string;
+  type: string;
+  project: string;
+  environment: string;
+}
 
 export const AuditLogs = () => {
-  const auditLogs = [
-    {
-      id: "1",
-      action: "Secret Updated",
-      details: "DATABASE_URL updated in Production environment for Frontend App",
-      user: "John Doe",
-      timestamp: "2024-01-15 14:30:22",
-      type: "update",
-      project: "Frontend App",
-      environment: "Production",
+  const { api } = useAuth();
+
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+
+  const {
+    data: logsData,
+    isLoading,
+  } = useQuery({
+    queryKey: ["audit-logs"],
+    queryFn: async () => {
+      const auditLogs = await api.auditLogs.getAuditLogs();
+      const users = await api.users.getUsers();
+      const logs = auditLogs.map((log) => ({
+        id: log.id,
+        action: log.action,
+        details: log.details,
+        user: users.find((user) => user.id === log.user_id)?.full_name || "Unknown",
+        timestamp: new Date(log.created_at).toLocaleString(),
+        project: "",
+        environment: "",
+        type: "",
+      }));
+      setAuditLogs(logs);
+      return logs;
     },
-    {
-      id: "2",
-      action: "Team Member Invited",
-      details: "Invited developer@example.com with Developer role",
-      user: "Jane Smith",
-      timestamp: "2024-01-15 13:45:10",
-      type: "create",
-      project: "All Projects",
-      environment: "N/A",
-    },
-    {
-      id: "3",
-      action: "Project Created",
-      details: "Created new project: Mobile App",
-      user: "Admin",
-      timestamp: "2024-01-15 12:15:33",
-      type: "create",
-      project: "Mobile App",
-      environment: "N/A",
-    },
-    {
-      id: "4",
-      action: "Secret Deleted",
-      details: "Removed LEGACY_API_KEY from Staging environment",
-      user: "John Doe",
-      timestamp: "2024-01-15 11:20:45",
-      type: "delete",
-      project: "Backend API",
-      environment: "Staging",
-    },
-    {
-      id: "5",
-      action: "Role Changed",
-      details: "Changed Bob Wilson's role from Viewer to Developer",
-      user: "Jane Smith",
-      timestamp: "2024-01-15 10:30:12",
-      type: "update",
-      project: "All Projects",
-      environment: "N/A",
-    },
-  ];
+  });
 
   const getActionBadgeColor = (type: string) => {
     switch (type) {
@@ -94,7 +81,10 @@ export const AuditLogs = () => {
             Track all activities and changes in your workspace
           </p>
         </div>
-        <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-700">
+        <Button
+          variant="outline"
+          className="border-gray-600 text-white hover:bg-gray-700"
+        >
           <Download className="w-4 h-4 mr-2" />
           Export
         </Button>
@@ -110,7 +100,7 @@ export const AuditLogs = () => {
             />
           </div>
         </div>
-        
+
         <div className="flex gap-2">
           <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
             <option>All Actions</option>
@@ -118,14 +108,14 @@ export const AuditLogs = () => {
             <option>Updates</option>
             <option>Deletes</option>
           </select>
-          
+
           <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
             <option>All Users</option>
             <option>John Doe</option>
             <option>Jane Smith</option>
             <option>Admin</option>
           </select>
-          
+
           <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-electric_indigo-500">
             <option>Last 24 hours</option>
             <option>Last 7 days</option>
@@ -133,7 +123,10 @@ export const AuditLogs = () => {
             <option>Custom range</option>
           </select>
 
-          <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-700">
+          <Button
+            variant="outline"
+            className="border-gray-600 text-white hover:bg-gray-700"
+          >
             <Filter className="w-4 h-4" />
           </Button>
         </div>
@@ -148,43 +141,70 @@ export const AuditLogs = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Event</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Project</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Environment</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">User</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Time</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-medium">Type</th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                    Event
+                  </th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                    Project
+                  </th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                    Environment
+                  </th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                    User
+                  </th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                    Time
+                  </th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                    Type
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {auditLogs.map((log) => (
-                  <tr key={log.id} className="border-b border-gray-700 hover:bg-gray-750">
+                  <tr
+                    key={log.id}
+                    className="border-b border-gray-700 hover:bg-gray-750"
+                  >
                     <td className="py-4 px-4">
                       <div>
                         <h3 className="font-medium text-white">{log.action}</h3>
-                        <p className="text-gray-400 text-sm mt-1">{log.details}</p>
+                        <p className="text-gray-400 text-sm mt-1">
+                          {log.details}
+                        </p>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="text-sm text-gray-300">{log.project}</span>
+                      <span className="text-sm text-gray-300">
+                        {log.project}
+                      </span>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="text-sm text-gray-300">{log.environment}</span>
+                      <span className="text-sm text-gray-300">
+                        {log.environment}
+                      </span>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center space-x-2">
                         <User className="w-3 h-3 text-gray-400" />
-                        <span className="text-sm text-gray-300">{log.user}</span>
+                        <span className="text-sm text-gray-300">
+                          {log.user}
+                        </span>
                       </div>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center space-x-1">
                         <Calendar className="w-3 h-3 text-gray-400" />
-                        <span className="text-sm text-gray-400">{log.timestamp}</span>
+                        <span className="text-sm text-gray-400">
+                          {log.timestamp}
+                        </span>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <Badge className={`${getActionBadgeColor(log.type)} border`}>
+                      <Badge
+                        className={`${getActionBadgeColor(log.type)} border`}
+                      >
                         <span className="mr-1">{getActionIcon(log.type)}</span>
                         {log.type}
                       </Badge>
@@ -199,3 +219,5 @@ export const AuditLogs = () => {
     </div>
   );
 };
+
+export default AuditLogs;
