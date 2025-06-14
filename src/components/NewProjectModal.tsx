@@ -26,7 +26,7 @@ export const NewProjectModal = ({ isOpen, onClose }: NewProjectModalProps) => {
       const response = await api.applications.createApp(project);
       return response;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["applications"],
       });
@@ -55,7 +55,7 @@ export const NewProjectModal = ({ isOpen, onClose }: NewProjectModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-800 border-gray-700 text-white">
+      <DialogContent className="bg-slate-800 border-slate-700 text-white rounded-xl">
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
         </DialogHeader>
@@ -67,7 +67,7 @@ export const NewProjectModal = ({ isOpen, onClose }: NewProjectModalProps) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter project name"
-              className="bg-gray-900 border-gray-700 text-white"
+              className="bg-slate-900 border-slate-700 text-white focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl"
               required
             />
           </div>
@@ -78,17 +78,22 @@ export const NewProjectModal = ({ isOpen, onClose }: NewProjectModalProps) => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe your project"
-              className="bg-gray-900 border-gray-700 text-white"
+              className="bg-slate-900 border-slate-700 text-white focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl"
               rows={3}
             />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} className="border-gray-600 text-white hover:bg-gray-700">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose} 
+              className="border-slate-600 text-white hover:bg-slate-700 rounded-xl"
+            >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 rounded-xl"
               disabled={createProject.isPending}
               onClick={handleSubmit}
             >

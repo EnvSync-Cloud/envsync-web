@@ -7,15 +7,16 @@ export const AuthContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { isAuthenticated, isLoading, user, api } = useAuth();
+  const { isAuthenticated, isLoading, user, api, token } = useAuth();
   const contextValue = useMemo(
     () => ({
       user,
       isLoading,
       isAuthenticated,
-      api
+      api,
+      token
     }),
-    [user, isLoading, isAuthenticated, api]
+    [user, isLoading, isAuthenticated, api, token]
   );
 
   return (

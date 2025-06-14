@@ -57,5 +57,6 @@ export const useAuth = () => {
     isLoading,
     isAuthenticated,
     api,
+    token: accessToken,
   };
 };

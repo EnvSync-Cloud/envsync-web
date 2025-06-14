@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,10 @@ import {
   Trash2,
   Search,
   Check,
+  AlertTriangle,
+  RefreshCw,
+  X,
+  Database,
 } from "lucide-react";
 import {
   Select,
@@ -21,10 +25,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter,
+  DialogDescription 
+} from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner"; // Assuming you have a toast library
+import { toast } from "sonner";
 
 interface ProjectEnvironmentsProps {
   projectNameId: string;
@@ -48,6 +59,25 @@ interface EnvVarFormData {
   value: string;
   sensitive: boolean;
 }
+
+interface FormErrors {
+  key?: string;
+  value?: string;
+}
+
+// Constants
+const ENVIRONMENT_COLORS = [
+  "bg-electric_indigo-500",
+  "bg-violet-500", 
+  "bg-veronica-500",
+  "bg-magenta-500",
+  "bg-blue-500",
+  "bg-green-500",
+  "bg-yellow-500",
+] as const;
+
+const COPY_SUCCESS_DURATION = 2000;
+const DEBOUNCE_DELAY = 300;
 
 export const ProjectEnvironments = ({
   projectNameId,
@@ -75,26 +105,26 @@ export const ProjectEnvironments = ({
     value: "",
     sensitive: false,
   });
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+
+  // Loading states for individual actions
+  const [actionLoadingStates, setActionLoadingStates] = useState<Record<string, boolean>>({});
 
   // Memoized color generator
   const getEnvironmentColor = useCallback((envName: string) => {
-    const colors = [
-      "bg-electric_indigo-500",
-      "bg-violet-500",
-      "bg-veronica-500",
-      "bg-magenta-500",
-      "bg-blue-500",
-      "bg-green-500",
-      "bg-yellow-500",
-    ];
     const index = Math.abs(
       envName.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0)
-    ) % colors.length;
-    return colors[index];
+    ) % ENVIRONMENT_COLORS.length;
+    return ENVIRONMENT_COLORS[index];
+  }, []);
+
+  // Helper function to set loading state for individual actions
+  const setActionLoading = useCallback((key: string, loading: boolean) => {
+    setActionLoadingStates(prev => ({ ...prev, [key]: loading }));
   }, []);
 
   // Fetch project data and environment types
-  const { data: projectData, isLoading: isProjectLoading } = useQuery({
+  const { data: projectData, isLoading: isProjectLoading, error: projectError } = useQuery({
     queryKey: ["project", projectNameId],
     queryFn: async () => {
       const [appData, environmentTypes] = await Promise.all([
@@ -108,24 +138,29 @@ export const ProjectEnvironments = ({
         color: getEnvironmentColor(envType.name),
       }));
 
-      // Set initial selected environment
-      if (environmentTypes.length > 0 && !selectedEnv) {
-        setSelectedEnv(environmentTypes[0].id);
-      }
-
       return {
         project: appData,
         environments,
       };
     },
     enabled: !!projectNameId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 3,
   });
+
+  // Set initial selected environment when project data loads
+  useEffect(() => {
+    if (projectData?.environments.length > 0 && !selectedEnv) {
+      setSelectedEnv(projectData.environments[0].id);
+    }
+  }, [projectData, selectedEnv]);
 
   // Fetch environment variables for selected environment
   const { 
     data: envVars = [], 
     isLoading: isEnvVarsLoading,
-    error: envVarsError 
+    error: envVarsError,
+    refetch: refetchEnvVars
   } = useQuery({
     queryKey: ["envVars", projectNameId, selectedEnv],
     queryFn: async () => {
@@ -137,11 +172,33 @@ export const ProjectEnvironments = ({
       return envVarsData.map((envVar) => ({
         key: envVar.key,
         value: envVar.value,
-        sensitive: false,
+        sensitive: false, // You might want to get this from the API
       }));
     },
     enabled: !!selectedEnv && !!projectNameId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 2,
   });
+
+  // Form validation
+  const validateForm = useCallback((): boolean => {
+    const errors: FormErrors = {};
+
+    if (!formData.key.trim()) {
+      errors.key = "Key is required";
+    } else if (!/^[A-Z_][A-Z0-9_]*$/i.test(formData.key)) {
+      errors.key = "Key must contain only letters, numbers, and underscores";
+    } else if (!editingEnvVar && envVars.some(envVar => envVar.key === formData.key)) {
+      errors.key = "Key already exists";
+    }
+
+    if (!formData.value.trim()) {
+      errors.value = "Value is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [formData, envVars, editingEnvVar]);
 
   // Mutations
   const addEnvVarMutation = useMutation({
@@ -160,48 +217,57 @@ export const ProjectEnvironments = ({
       resetForm();
       setShowAddEnvVarDialog(false);
     },
-    onError: (error) => {
-      toast.error(`Failed to add environment variable: ${error.message}`);
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || error.message || "Failed to add environment variable";
+      toast.error(message);
     },
   });
 
   const updateEnvVarMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
       if (!selectedEnv) throw new Error("No environment selected");
+      setActionLoading(key, true);
       return api.environmentVariables.updateEnv(key, {
         app_id: projectNameId,
         env_type_id: selectedEnv,
         value
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, { key }) => {
       queryClient.invalidateQueries({ queryKey: ["envVars", projectNameId, selectedEnv] });
       toast.success("Environment variable updated successfully");
       resetForm();
       setShowEditEnvVarDialog(false);
+      setActionLoading(key, false);
     },
-    onError: (error) => {
-      toast.error(`Failed to update environment variable: ${error.message}`);
+    onError: (error: any, { key }) => {
+      const message = error?.response?.data?.message || error.message || "Failed to update environment variable";
+      toast.error(message);
+      setActionLoading(key, false);
     },
   });
 
   const deleteEnvVarMutation = useMutation({
     mutationFn: async (key: string) => {
       if (!selectedEnv) throw new Error("No environment selected");
+      setActionLoading(key, true);
       return api.environmentVariables.deleteEnv({
         app_id: projectNameId,
         env_type_id: selectedEnv,
         key,
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, key) => {
       queryClient.invalidateQueries({ queryKey: ["envVars", projectNameId, selectedEnv] });
       toast.success("Environment variable deleted successfully");
       setShowDeleteEnvVarDialog(false);
       setEditingEnvVar(null);
+      setActionLoading(key, false);
     },
-    onError: (error) => {
-      toast.error(`Failed to delete environment variable: ${error.message}`);
+    onError: (error: any, key) => {
+      const message = error?.response?.data?.message || error.message || "Failed to delete environment variable";
+      toast.error(message);
+      setActionLoading(key, false);
     },
   });
 
@@ -209,28 +275,16 @@ export const ProjectEnvironments = ({
   const resetForm = useCallback(() => {
     setFormData({ key: "", value: "", sensitive: false });
     setEditingEnvVar(null);
+    setFormErrors({});
   }, []);
 
   const handleFormChange = useCallback((field: keyof EnvVarFormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  }, []);
-
-  const validateForm = useCallback(() => {
-    if (!formData.key.trim()) {
-      toast.error("Key is required");
-      return false;
+    // Clear field error when user starts typing
+    if (formErrors[field as keyof FormErrors]) {
+      setFormErrors(prev => ({ ...prev, [field]: undefined }));
     }
-    if (!formData.value.trim()) {
-      toast.error("Value is required");
-      return false;
-    }
-    // Check for duplicate keys when adding
-    if (!editingEnvVar && envVars.some(envVar => envVar.key === formData.key)) {
-      toast.error("Key already exists");
-      return false;
-    }
-    return true;
-  }, [formData, envVars, editingEnvVar]);
+  }, [formErrors]);
 
   // Event handlers
   const handleAddEnvVar = useCallback(() => {
@@ -245,6 +299,7 @@ export const ProjectEnvironments = ({
       value: envVar.value,
       sensitive: envVar.sensitive,
     });
+    setFormErrors({});
     setShowEditEnvVarDialog(true);
   }, []);
 
@@ -266,7 +321,7 @@ export const ProjectEnvironments = ({
       await navigator.clipboard.writeText(value);
       setCopiedKey(key);
       toast.success("Value copied to clipboard!");
-      setTimeout(() => setCopiedKey(null), 2000);
+      setTimeout(() => setCopiedKey(null), COPY_SUCCESS_DURATION);
     } catch (error) {
       toast.error("Failed to copy value");
     }
@@ -278,6 +333,21 @@ export const ProjectEnvironments = ({
 
   const maskValue = useCallback((value: string) => {
     return "•".repeat(Math.min(value.length, 20));
+  }, []);
+
+  const handleCloseAddDialog = useCallback(() => {
+    setShowAddEnvVarDialog(false);
+    resetForm();
+  }, [resetForm]);
+
+  const handleCloseEditDialog = useCallback(() => {
+    setShowEditEnvVarDialog(false);
+    resetForm();
+  }, [resetForm]);
+
+  const handleCloseDeleteDialog = useCallback(() => {
+    setShowDeleteEnvVarDialog(false);
+    setEditingEnvVar(null);
   }, []);
 
   // Memoized computed values
@@ -301,87 +371,404 @@ export const ProjectEnvironments = ({
   // Loading states
   if (isProjectLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-white">Loading project...</div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="size-12 border-4 border-t-electric_indigo-500 border-gray-700 rounded-full animate-spin"></div>
+          <div className="text-white">Loading project...</div>
+        </div>
       </div>
     );
   }
 
-  if (!projectData) {
+  // Error states
+  if (projectError) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-red-400">Failed to load project data</div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center space-y-4">
+          <AlertTriangle className="w-12 h-12 text-red-400" />
+          <div className="text-red-400 text-center">
+            <h3 className="text-lg font-semibold mb-2">Failed to load project</h3>
+            <p className="text-sm text-gray-400 mb-4">
+              {projectError instanceof Error ? projectError.message : "Unknown error occurred"}
+            </p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+    if (!projectData) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-white mb-2">No Project Data</h3>
+          <p className="text-gray-400 mb-4">Unable to load project information</p>
+          <Button
+            onClick={onBack}
+            variant="outline"
+            className="text-white border-gray-600 hover:bg-gray-700"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Go Back
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Header Section */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button
-            variant="ghost"
             onClick={onBack}
-            className="text-white hover:bg-gray-800"
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 hover:text-white"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Projects
+            Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-2xl font-bold text-white">
               {projectData.project.name}
             </h1>
-            <p className="text-gray-400 mt-2">Manage environment variables</p>
+            <p className="text-gray-400">Environment Variables</p>
           </div>
         </div>
         <Button
+          onClick={() => setShowAddEnvVarDialog(true)}
           className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
-          onClick={() => {
-            resetForm();
-            setShowAddEnvVarDialog(true);
-          }}
-          disabled={!selectedEnv}
+          disabled={!selectedEnv || addEnvVarMutation.isPending}
         >
           <Plus className="w-4 h-4 mr-2" />
-          Add Secret
+          Add Variable
         </Button>
       </div>
 
+      {/* Environment Selection and Search */}
+      <Card className="bg-gray-800 border-gray-700">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Environment Selector */}
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Environment
+              </label>
+              <Select value={selectedEnv} onValueChange={setSelectedEnv}>
+                <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                  <SelectValue placeholder="Select environment" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  {filteredEnvironments.map((env) => (
+                    <SelectItem key={env.id} value={env.id} className="text-white">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 rounded-full ${env.color}`} />
+                        <span>{env.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Search Variables */}
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Search Variables
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search by key name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-gray-900 border-gray-700 text-white"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Environment Variables List */}
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-white flex items-center">
+              {selectedEnvironment && (
+                <div className={`w-3 h-3 rounded-full ${selectedEnvironment.color} mr-2`} />
+              )}
+              {selectedEnvironment?.name || "Select Environment"} Variables
+              {filteredVars.length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {filteredVars.length}
+                </Badge>
+              )}
+            </CardTitle>
+            {selectedEnv && (
+              <Button
+                onClick={() => refetchEnvVars()}
+                variant="outline"
+                size="sm"
+                className="text-gray-400 border-gray-600 hover:bg-gray-700"
+                disabled={isEnvVarsLoading}
+              >
+                <RefreshCw className={`w-4 h-4 ${isEnvVarsLoading ? 'animate-spin' : ''}`} />
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Loading State */}
+          {isEnvVarsLoading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="flex flex-col items-center space-y-2">
+                <div className="size-8 border-4 border-t-electric_indigo-500 border-gray-700 rounded-full animate-spin"></div>
+                <p className="text-gray-400 text-sm">Loading variables...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {envVarsError && (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+                <p className="text-red-400 mb-2">Failed to load environment variables</p>
+                <Button
+                  onClick={() => refetchEnvVars()}
+                  variant="outline"
+                  size="sm"
+                  className="text-gray-400 border-gray-600 hover:bg-gray-700"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Retry
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!isEnvVarsLoading && !envVarsError && filteredVars.length === 0 && (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Database className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-white mb-2">
+                {searchQuery ? "No variables found" : "No environment variables"}
+              </h3>
+              <p className="text-gray-400 mb-4">
+                {searchQuery 
+                  ? `No variables match "${searchQuery}"`
+                  : selectedEnv 
+                    ? "Add your first environment variable to get started"
+                    : "Select an environment to view variables"
+                }
+              </p>
+              {selectedEnv && !searchQuery && (
+                <Button
+                  onClick={() => setShowAddEnvVarDialog(true)}
+                  className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Variable
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Variables Table */}
+          {!isEnvVarsLoading && !envVarsError && filteredVars.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="text-left py-3 px-4 text-gray-400 font-medium">Key</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-medium">Value</th>
+                    <th className="text-right py-3 px-4 text-gray-400 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredVars.map((envVar) => (
+                    <tr
+                      key={envVar.key}
+                      className="border-b border-gray-700 hover:bg-gray-750 transition-colors"
+                    >
+                      <td className="py-4 px-4">
+                        <div className="flex items-center space-x-2">
+                          <code className="text-sm font-mono text-electric_indigo-300 bg-gray-900 px-2 py-1 rounded">
+                            {envVar.key}
+                          </code>
+                          {envVar.sensitive && (
+                            <Badge variant="secondary" className="text-xs">
+                              Sensitive
+                            </Badge>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center space-x-2">
+                          <code className="text-sm font-mono text-gray-300 bg-gray-900 px-2 py-1 rounded max-w-xs truncate">
+                            {showValues[envVar.key] ? envVar.value : maskValue(envVar.value)}
+                          </code>
+                          <Button
+                            onClick={() => toggleValueVisibility(envVar.key)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-400 hover:text-white p-1"
+                          >
+                            {showValues[envVar.key] ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <div className="flex items-center justify-end space-x-2">
+                          <Button
+                            onClick={() => handleCopyValue(envVar.value, envVar.key)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-400 hover:text-white p-2"
+                            title="Copy value"
+                          >
+                            {copiedKey === envVar.key ? (
+                              <Check className="w-4 h-4 text-green-400" />
+                            ) : (
+                              <Copy className="w-4 h-4" />
+                            )}
+                          </Button>
+                          <Button
+                            onClick={() => handleEditEnvVar(envVar)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-400 hover:text-white p-2"
+                            title="Edit variable"
+                            disabled={actionLoadingStates[envVar.key]}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setEditingEnvVar(envVar);
+                              setShowDeleteEnvVarDialog(true);
+                            }}
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-400 hover:text-red-400 p-2"
+                            title="Delete variable"
+                            disabled={actionLoadingStates[envVar.key]}
+                          >
+                            {actionLoadingStates[envVar.key] ? (
+                              <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Add Environment Variable Dialog */}
       <Dialog open={showAddEnvVarDialog} onOpenChange={setShowAddEnvVarDialog}>
-        <DialogContent>
+        <DialogContent className="bg-gray-800 border-gray-700 max-w-md">
           <DialogHeader>
-            <DialogTitle>Add New Environment Variable</DialogTitle>
+            <DialogTitle className="text-white">Add Environment Variable</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Add a new environment variable to {selectedEnvironment?.name}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <Input
-              placeholder="Key"
-              value={formData.key}
-              onChange={(e) => handleFormChange("key", e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-            <Input
-              placeholder="Value"
-              value={formData.value}
-              onChange={(e) => handleFormChange("value", e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
-            />
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white">Key *</label>
+              <Input
+                placeholder="VARIABLE_NAME"
+                value={formData.key}
+                onChange={(e) => handleFormChange('key', e.target.value.toUpperCase())}
+                className={`bg-gray-900 border-gray-700 text-white ${
+                  formErrors.key ? 'border-red-500' : ''
+                }`}
+              />
+              {formErrors.key && (
+                <p className="text-red-400 text-sm">{formErrors.key}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white">Value *</label>
+              <Input
+                placeholder="Enter value"
+                value={formData.value}
+                onChange={(e) => handleFormChange('value', e.target.value)}
+                className={`bg-gray-900 border-gray-700 text-white ${
+                  formErrors.value ? 'border-red-500' : ''
+                }`}
+              />
+              {formErrors.value && (
+                <p className="text-red-400 text-sm">{formErrors.value}</p>
+              )}
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="sensitive"
+                checked={formData.sensitive}
+                onChange={(e) => handleFormChange('sensitive', e.target.checked)}
+                className="rounded border-gray-700 bg-gray-900"
+              />
+              <label htmlFor="sensitive" className="text-sm text-white">
+                Mark as sensitive
+              </label>
+            </div>
           </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setShowAddEnvVarDialog(false)}
+              onClick={handleCloseAddDialog}
+              className="text-white border-gray-600 hover:bg-gray-700"
               disabled={addEnvVarMutation.isPending}
             >
               Cancel
             </Button>
             <Button
               onClick={handleAddEnvVar}
-              disabled={addEnvVarMutation.isPending}
               className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
+              disabled={addEnvVarMutation.isPending}
             >
-              {addEnvVarMutation.isPending ? "Adding..." : "Add"}
+              {addEnvVarMutation.isPending ? (
+                <>
+                  <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                "Add Variable"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -389,38 +776,71 @@ export const ProjectEnvironments = ({
 
       {/* Edit Environment Variable Dialog */}
       <Dialog open={showEditEnvVarDialog} onOpenChange={setShowEditEnvVarDialog}>
-        <DialogContent>
+        <DialogContent className="bg-gray-800 border-gray-700 max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Environment Variable</DialogTitle>
+            <DialogTitle className="text-white">Edit Environment Variable</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Update the value for {editingEnvVar?.key} in {selectedEnvironment?.name}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <Input
-              placeholder="Key"
-              value={formData.key}
-              disabled
-              className="bg-gray-800 border-gray-700 text-white opacity-50"
-            />
-            <Input
-              placeholder="Value"
-              value={formData.value}
-              onChange={(e) => handleFormChange("value", e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
-            />
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white">Key</label>
+              <Input
+                value={formData.key}
+                disabled
+                className="bg-gray-900 border-gray-700 text-gray-400 opacity-50"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white">Value *</label>
+              <Input
+                placeholder="Enter value"
+                value={formData.value}
+                onChange={(e) => handleFormChange('value', e.target.value)}
+                className={`bg-gray-900 border-gray-700 text-white ${
+                  formErrors.value ? 'border-red-500' : ''
+                }`}
+              />
+              {formErrors.value && (
+                <p className="text-red-400 text-sm">{formErrors.value}</p>
+              )}
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="sensitive-edit"
+                checked={formData.sensitive}
+                onChange={(e) => handleFormChange('sensitive', e.target.checked)}
+                className="rounded border-gray-700 bg-gray-900"
+              />
+              <label htmlFor="sensitive-edit" className="text-sm text-white">
+                Mark as sensitive
+              </label>
+            </div>
           </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setShowEditEnvVarDialog(false)}
+              onClick={handleCloseEditDialog}
+              className="text-white border-gray-600 hover:bg-gray-700"
               disabled={updateEnvVarMutation.isPending}
             >
               Cancel
             </Button>
             <Button
               onClick={handleUpdateEnvVar}
-              disabled={updateEnvVarMutation.isPending}
               className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
+              disabled={updateEnvVarMutation.isPending}
             >
-              {updateEnvVarMutation.isPending ? "Saving..." : "Save Changes"}
+              {updateEnvVarMutation.isPending ? (
+                <>
+                  <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Update Variable"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -428,190 +848,56 @@ export const ProjectEnvironments = ({
 
       {/* Delete Environment Variable Dialog */}
       <Dialog open={showDeleteEnvVarDialog} onOpenChange={setShowDeleteEnvVarDialog}>
-        <DialogContent>
+        <DialogContent className="bg-gray-800 border-gray-700 max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete Environment Variable</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-gray-400">
+            <DialogTitle className="text-white">Delete Environment Variable</DialogTitle>
+            <DialogDescription className="text-gray-400">
               Are you sure you want to delete the environment variable "{editingEnvVar?.key}"?
               This action cannot be undone.
-            </p>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 mt-4">
+            <div className="flex items-start space-x-3">
+              <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-red-400 font-medium text-sm">Warning</h4>
+                <p className="text-red-300 text-sm mt-1">
+                  This will permanently remove the environment variable from {selectedEnvironment?.name}.
+                  Any applications depending on this variable may stop working.
+                </p>
+              </div>
+            </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="mt-6">
             <Button
               variant="outline"
-              onClick={() => setShowDeleteEnvVarDialog(false)}
+              onClick={handleCloseDeleteDialog}
+              className="text-white border-gray-600 hover:bg-gray-700"
               disabled={deleteEnvVarMutation.isPending}
             >
               Cancel
             </Button>
             <Button
-              variant="destructive"
               onClick={handleDeleteEnvVar}
-              disabled={deleteEnvVarMutation.isPending}
+              variant="destructive"
               className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={deleteEnvVarMutation.isPending}
             >
-              {deleteEnvVarMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteEnvVarMutation.isPending ? (
+                <>
+                  <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Variable
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Environment Selection and Search */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex space-x-2">
-          <Select value={selectedEnv} onValueChange={setSelectedEnv}>
-            <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
-              <SelectValue placeholder="Select environment" />
-            </SelectTrigger>
-            <SelectContent className="bg-gray-800 p-1 border-gray-700 text-white">
-              <Input
-                placeholder="Search environments..."
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 mb-2"
-                value={searchEnv}
-                onChange={(e) => setSearchEnv(e.target.value)}
-              />
-              {filteredEnvironments.map((env) => (
-                <SelectItem
-                  key={env.id}
-                  value={env.id}
-                  className="focus:bg-gray-700"
-                >
-                  <div className="flex items-center">
-                    <div
-                      className={`w-2 h-2 rounded-full ${env.color} mr-2`}
-                    />
-                    {env.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Search secrets..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-gray-800 border-gray-700 focus:border-electric_indigo-500 text-white placeholder-gray-400"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Environment Variables Card */}
-      <Card className="bg-gray-800 border-gray-700">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-white">
-              {selectedEnvironment?.name} Environment
-            </CardTitle>
-            <Badge variant="secondary" className="bg-gray-700 text-white">
-              {filteredVars.length} secrets
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isEnvVarsLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-gray-400">Loading environment variables...</div>
-            </div>
-          ) : envVarsError ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-red-400">Failed to load environment variables</div>
-            </div>
-          ) : filteredVars.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-              <div className="text-lg mb-2">No environment variables found</div>
-              <div className="text-sm">
-                {searchQuery ? "Try adjusting your search" : "Add your first secret to get started"}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredVars.map((envVar) => (
-                <div
-                  key={envVar.key}
-                  className="flex items-center justify-between p-4 bg-gray-900 rounded-lg"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="font-mono font-medium text-blue-800">
-                        {envVar.key}
-                      </span>
-                      {envVar.sensitive && (
-                        <Badge variant="destructive" className="text-xs">
-                          Sensitive
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        value={
-                          showValues[envVar.key]
-                            ? envVar.value
-                            : maskValue(envVar.value)
-                        }
-                        readOnly
-                        className="bg-gray-800 border-gray-700 font-mono text-sm text-white"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => toggleValueVisibility(envVar.key)}
-                        className="text-gray-400 hover:text-white hover:bg-gray-700"
-                      >
-                        {showValues[envVar.key] ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-1 ml-4">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-gray-400 hover:text-white hover:bg-gray-700"
-                      onClick={() => handleCopyValue(envVar.value, envVar.key)}
-                    >
-                      {copiedKey === envVar.key ? (
-                        <Check className="w-4 h-4 text-green-400" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-gray-400 hover:text-white hover:bg-gray-700"
-                      onClick={() => handleEditEnvVar(envVar)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-400 hover:text-red-300 hover:bg-gray-700"
-                      onClick={() => {
-                        setEditingEnvVar(envVar);
-                        setShowDeleteEnvVarDialog(true);
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 };
