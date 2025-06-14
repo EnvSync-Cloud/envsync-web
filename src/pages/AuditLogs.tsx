@@ -3,61 +3,48 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar, User, Search, Filter, Download } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+
+type AuditLog = {
+  id: string;
+  action: string;
+  details: string;
+  user: string;
+  timestamp: string;
+  type: string;
+  project: string;
+  environment: string;
+}
 
 export const AuditLogs = () => {
-  const auditLogs = [
-    {
-      id: "1",
-      action: "Secret Updated",
-      details:
-        "DATABASE_URL updated in Production environment for Frontend App",
-      user: "John Doe",
-      timestamp: "2024-01-15 14:30:22",
-      type: "update",
-      project: "Frontend App",
-      environment: "Production",
+  const { api } = useAuth();
+
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+
+  const {
+    data: logsData,
+    isLoading,
+  } = useQuery({
+    queryKey: ["audit-logs"],
+    queryFn: async () => {
+      const auditLogs = await api.auditLogs.getAuditLogs();
+      const users = await api.users.getUsers();
+      const logs = auditLogs.map((log) => ({
+        id: log.id,
+        action: log.action,
+        details: log.details,
+        user: users.find((user) => user.id === log.user_id)?.full_name || "Unknown",
+        timestamp: new Date(log.created_at).toLocaleString(),
+        project: "",
+        environment: "",
+        type: "",
+      }));
+      setAuditLogs(logs);
+      return logs;
     },
-    {
-      id: "2",
-      action: "Team Member Invited",
-      details: "Invited developer@example.com with Developer role",
-      user: "Jane Smith",
-      timestamp: "2024-01-15 13:45:10",
-      type: "create",
-      project: "All Projects",
-      environment: "N/A",
-    },
-    {
-      id: "3",
-      action: "Project Created",
-      details: "Created new project: Mobile App",
-      user: "Admin",
-      timestamp: "2024-01-15 12:15:33",
-      type: "create",
-      project: "Mobile App",
-      environment: "N/A",
-    },
-    {
-      id: "4",
-      action: "Secret Deleted",
-      details: "Removed LEGACY_API_KEY from Staging environment",
-      user: "John Doe",
-      timestamp: "2024-01-15 11:20:45",
-      type: "delete",
-      project: "Backend API",
-      environment: "Staging",
-    },
-    {
-      id: "5",
-      action: "Role Changed",
-      details: "Changed Bob Wilson's role from Viewer to Developer",
-      user: "Jane Smith",
-      timestamp: "2024-01-15 10:30:12",
-      type: "update",
-      project: "All Projects",
-      environment: "N/A",
-    },
-  ];
+  });
 
   const getActionBadgeColor = (type: string) => {
     switch (type) {

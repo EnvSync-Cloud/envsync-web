@@ -3,6 +3,7 @@ import {
   EnvSyncAPISDK,
   type WhoAmIResponse,
 } from "@envsync-cloud/envsync-ts-sdk";
+import { env } from "@/utils/env";
 
 export const useAuth = () => {
   const [user, setUser] = useState<WhoAmIResponse | undefined>(undefined);
@@ -11,6 +12,7 @@ export const useAuth = () => {
 
   const accessToken = localStorage.getItem("access_token");
   const api = new EnvSyncAPISDK({
+    BASE: env.VITE_API_BASE_URL,
     TOKEN: accessToken,
   });
 

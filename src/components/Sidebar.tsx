@@ -1,18 +1,24 @@
-import { Home, Settings, Users, Database, Activity } from "lucide-react";
+import { Home, Settings, Users, Database, Activity, Globe, Key } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const navigation = [
-  { id: "dashboard", name: "Dashboard", icon: Home },
   { id: "applications", name: "Projects", icon: Database },
   { id: "users", name: "Team", icon: Users },
+  { id: "apikeys", name: "API Keys", icon: Key },
   { id: "audit", name: "Activity", icon: Activity },
   { id: "settings", name: "Account", icon: Settings },
+  { id: "organisation", name: "Organisation", icon: Globe },
 ];
 
 export const Sidebar = () => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading || !user) return null;
+
   const { pathname } = useLocation();
-  const activeView = pathname.split("/")[1] || "dashboard";
+  const activeView = pathname.split("/")[1] || "applications";
 
   return (
     <div className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
@@ -49,11 +55,21 @@ export const Sidebar = () => {
       <div className="p-4 border-t border-gray-800">
         <div className="flex items-center space-x-3 mt-4">
           <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs font-medium">JD</span>
+            {user.user.profile_picture_url ? (
+              <img
+                src={user.user.profile_picture_url}
+                alt="User Avatar"
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <span className="text-white font-semibold text-sm">
+                {user.user.full_name?.charAt(0)?.toUpperCase() || "U"}
+              </span>
+            )}
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-white">John Doe</p>
-            <p className="text-xs text-gray-400">john@example.com</p>
+            <p className="text-sm font-medium text-white">{user.user.full_name ?? ""}</p>
+            <p className="text-xs text-gray-400">{user.user.email ?? ""}</p>
           </div>
         </div>
       </div>

@@ -5,8 +5,6 @@ import {
   Plus,
   Database,
   MoreHorizontal,
-  Settings,
-  Copy,
   Trash2,
 } from "lucide-react";
 import {
@@ -17,74 +15,97 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NewProjectModal } from "@/components/NewProjectModal";
 import { ProjectEnvironments } from "@/components/ProjectEnvironments";
+import { useAuth } from "@/hooks/useAuth";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+interface App {
+  id: string;
+  org_id: string;
+  name: string;
+  description: string;
+	metadata: Record<string, any>;
+  status?: string;
+  created_at: Date;
+  updated_at: Date;
+}
 
 export const Applications = () => {
+  const { api } = useAuth();
+  
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [applications, setApplications] = useState([
-    {
-      id: "app_1",
-      name: "Frontend App",
-      description: "React application for customer portal",
-      configs: 3,
-      secrets: 24,
-      lastUpdated: "2 hours ago",
-      status: "active",
-    },
-    {
-      id: "app_2",
-      name: "Backend API",
-      description: "Node.js REST API for core services",
-      configs: 4,
-      secrets: 18,
-      lastUpdated: "1 day ago",
-      status: "active",
-    },
-    {
-      id: "app_3",
-      name: "Mobile App",
-      description: "React Native mobile application",
-      configs: 2,
-      secrets: 12,
-      lastUpdated: "3 days ago",
-      status: "active",
-    },
-    {
-      id: "app_4",
-      name: "Data Pipeline",
-      description: "Python ETL jobs for data processing",
-      configs: 3,
-      secrets: 15,
-      lastUpdated: "1 week ago",
-      status: "inactive",
-    },
-  ]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [applications, setApplications] = useState<App[]>([]);
 
-  const handleCreateProject = (project: {
-    name: string;
-    description: string;
-  }) => {
-    const newProject = {
-      id: `app_${applications.length + 1}`,
-      name: project.name,
-      description: project.description,
-      configs: 0,
-      secrets: 0,
-      lastUpdated: "Just now",
-      status: "active",
-    };
-    setApplications([...applications, newProject]);
+  const queryClient = useQueryClient();
+
+  const { data: appsData } = useQuery({
+    queryKey: ["applications"],
+    queryFn: async () => {
+      const response = await api.applications.getApps();
+
+      const apps = response.map((app) => ({
+        id: app.id,
+        org_id: app.org_id,
+        name: app.name,
+        description: app.description,
+        metadata: app.metadata || {},
+        status: "active",
+        created_at: new Date(app.created_at),
+        updated_at: new Date(app.updated_at),
+      }));
+
+      setApplications(apps);
+      queryClient.setQueryData(["applications"], apps);
+
+      return apps;
+    },
+  });
+
+  const deleteProject = useMutation({
+    mutationFn: async (projectId: string) => {
+      await api.applications.deleteApp(projectId);
+      setApplications((prev) => prev.filter((app) => app.id !== projectId));
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+    },
+    onError: (error) => {
+      console.error("Error deleting project:", error);
+    },
+  });
+
+  const handleProjectClick = (projectId: string) => {
+    setSelectedProjectId(projectId);
   };
 
-  const handleProjectClick = (projectName: string) => {
-    setSelectedProject(projectName);
+  const handleDeleteProject = (projectId: string) => {
+    if (deleteProject.isPending) return; // Prevent multiple clicks
+
+    if (!window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+      return;
+    }
+
+    deleteProject.mutate(projectId);
   };
 
-  if (selectedProject) {
+  if (!appsData || appsData.length === 0) {
+    return (
+      <div className="text-center text-gray-400">
+        <p>No projects found. Create a new project to get started.</p>
+        <Button
+          onClick={() => setShowNewProjectModal(true)}
+          className="mt-4 bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Create Project
+        </Button>
+      </div>
+    );
+  }
+
+  if (selectedProjectId) {
     return (
       <ProjectEnvironments
-        projectName={selectedProject}
-        onBack={() => setSelectedProject(null)}
+        projectNameId={selectedProjectId}
+        onBack={() => setSelectedProjectId(null)}
       />
     );
   }
@@ -117,7 +138,7 @@ export const Applications = () => {
               <div className="flex items-start justify-between">
                 <div
                   className="flex items-center space-x-3"
-                  onClick={() => handleProjectClick(app.name)}
+                  onClick={() => handleProjectClick(app.id)}
                 >
                   <div className="w-12 h-12 bg-gradient-to-br from-electric_indigo-500 to-violet-500 rounded-xl flex items-center justify-center">
                     <Database className="w-6 h-6 text-white" />
@@ -150,35 +171,35 @@ export const Applications = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-gray-800 border-gray-700">
-                    <DropdownMenuItem className="text-white hover:bg-gray-700">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-white hover:bg-gray-700">
-                      <Copy className="w-4 h-4 mr-2" />
-                      Duplicate
-                    </DropdownMenuItem>
                     <DropdownMenuItem className="text-red-400 hover:bg-gray-700">
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteProject(app.id)}
+                        className="w-full text-left"
+                        disabled={deleteProject.isPending}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </CardHeader>
-            <CardContent onClick={() => handleProjectClick(app.name)}>
+            <CardContent onClick={() => handleProjectClick(app.id)}>
               <p className="text-gray-400 text-sm mb-6">{app.description}</p>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="text-center p-3 bg-gray-900 rounded-lg">
                   <div className="text-2xl font-bold text-white">
-                    {app.configs}
+                    0
                   </div>
                   <div className="text-xs text-gray-400">Configs</div>
                 </div>
                 <div className="text-center p-3 bg-gray-900 rounded-lg">
                   <div className="text-2xl font-bold text-white">
-                    {app.secrets}
+                    0
                   </div>
                   <div className="text-xs text-gray-400">Secrets</div>
                 </div>
@@ -186,7 +207,7 @@ export const Applications = () => {
 
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-400">Last updated</span>
-                <span className="text-white">{app.lastUpdated}</span>
+                <span className="text-white">{app.updated_at?.toLocaleString()}</span>
               </div>
             </CardContent>
           </Card>
@@ -196,7 +217,6 @@ export const Applications = () => {
       <NewProjectModal
         isOpen={showNewProjectModal}
         onClose={() => setShowNewProjectModal(false)}
-        onCreateProject={handleCreateProject}
       />
     </div>
   );
