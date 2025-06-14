@@ -1,10 +1,45 @@
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { useAuth } from "@/hooks/useAuth";
+import { useSidebar } from "@/hooks/useSidebar";
 import { Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export const RootLayout = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { sidebarExpanded, toggleSidebar } = useSidebar();
+  
+  // Save sidebar state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('envsync-sidebar-expanded', JSON.stringify(sidebarExpanded));
+    } catch (error) {
+      console.warn('Failed to save sidebar state to localStorage:', error);
+    }
+  }, [sidebarExpanded]);
+
+  // Keyboard shortcut to toggle sidebar
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
+        event.preventDefault();
+        toggleSidebar();
+      }
+      
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'S') {
+        event.preventDefault();
+        toggleSidebar();
+      }
+    };
+
+    if (isAuthenticated && user) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isAuthenticated, user, toggleSidebar]);
 
   if (isLoading) {
     return (
@@ -36,14 +71,40 @@ export const RootLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white flex">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="flex-1 p-6">
-          <Outlet />
+    <div className="h-screen bg-slate-900 text-white flex overflow-hidden">
+      {/* Fixed Sidebar */}
+      <div className={`fixed left-0 top-0 h-full z-30 transition-all duration-300 ease-in-out ${
+        sidebarExpanded ? 'w-64' : 'w-16'
+      }`}>
+        <Sidebar 
+          expanded={sidebarExpanded}
+          onToggle={toggleSidebar}
+        />
+      </div>
+      
+      {/* Main Content Area */}
+      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
+        sidebarExpanded ? 'ml-64' : 'ml-16'
+      }`}>
+        {/* Fixed Header */}
+        <div className="flex-shrink-0">
+          <Header />
+        </div>
+        
+        {/* Scrollable Content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            <Outlet />
+          </div>
         </main>
       </div>
+
+      {/* Keyboard Shortcut Indicator (Optional - for development/debugging) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed bottom-4 right-4 bg-slate-800 text-slate-300 px-3 py-2 rounded-lg text-xs opacity-50 hover:opacity-100 transition-opacity">
+          Press <kbd className="bg-slate-700 px-1 py-0.5 rounded text-xs">Ctrl+B</kbd> to toggle sidebar
+        </div>
+      )}
     </div>
   );
 };

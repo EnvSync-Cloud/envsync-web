@@ -26,7 +26,7 @@ export const NewProjectModal = ({ isOpen, onClose }: NewProjectModalProps) => {
       const response = await api.applications.createApp(project);
       return response;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["applications"],
       });
