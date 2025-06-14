@@ -1,10 +1,11 @@
+
 import { useAuth } from "@/hooks/useAuth";
 
 export const Header = () => {
   const { user } = useAuth();
   
   return (
-    <header className="bg-gray-900 border-b border-gray-800 px-6 py-4">
+    <header className="bg-slate-800 border-b border-slate-700 px-6 py-4 backdrop-blur-sm">
       <div className="flex items-center justify-between">
         {/* Organization Info */}
         <div className="flex items-center space-x-3">
@@ -15,7 +16,7 @@ export const Header = () => {
               className="w-8 h-8 rounded-lg object-cover"
             />
           ) : (
-            <div className="w-8 h-8 bg-gradient-to-br from-electric_indigo-500 to-magenta-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-lg flex items-center justify-center">
               <span className="text-white font-semibold text-sm">
                 {user?.org?.name?.charAt(0)?.toUpperCase() || 'O'}
               </span>
@@ -25,7 +26,7 @@ export const Header = () => {
             <h1 className="text-white font-semibold text-lg">
               {user?.org?.name || 'Organization'}
             </h1>
-            <span className="text-gray-400 text-xs">
+            <span className="text-slate-400 text-xs">
               @{user?.org?.slug}
             </span>
           </div>

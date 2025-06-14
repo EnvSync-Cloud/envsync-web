@@ -8,10 +8,10 @@ export const RootLayout = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-950">
+      <div className="flex items-center justify-center h-screen bg-slate-900">
         <div className="flex flex-col items-center space-y-4">
-          <div className="size-12 border-4 border-t-electric_indigo-500 border-gray-700 rounded-full animate-spin"></div>
-          <p className="text-gray-400">Loading your data...</p>
+          <div className="size-12 border-4 border-t-emerald-500 border-slate-700 rounded-full animate-spin"></div>
+          <p className="text-slate-400">Loading your data...</p>
         </div>
       </div>
     );
@@ -19,28 +19,24 @@ export const RootLayout = () => {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center px-4">
         <div className="max-w-md w-full space-y-6 text-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-electric_indigo-500 to-magenta-500 rounded-xl flex items-center justify-center mb-6">
-            <span className="text-white font-bold text-2xl">E$</span>
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/20">
+            <span className="text-white font-bold text-2xl">E</span>
           </div>
           <h2 className="text-2xl font-bold text-white">
             Authentication Required
           </h2>
-          <p className="text-gray-400">
+          <p className="text-slate-400">
             You need to be signed in to access EnvSync.
           </p>
-          {/* <div className="flex items-center justify-center space-x-2 text-gray-400">
-            <div className="w-4 h-4 border-2 border-t-electric_indigo-500 border-gray-700 rounded-full animate-spin"></div>
-            <span>Redirecting to login page...</span>
-          </div> */}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex">
+    <div className="min-h-screen bg-slate-900 text-white flex">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
