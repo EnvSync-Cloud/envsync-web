@@ -1,17 +1,18 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Database, Users, FileText, Activity, Plus, ArrowRight } from "lucide-react";
+import {
+  Database,
+  Users,
+  FileText,
+  Activity,
+  Plus,
+  ArrowRight,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { WhoAmIResponse } from "@envsync-cloud/envsync-ts-sdk";
 
-export const Dashboard = (
-  {
-      whoami
-  }: {
-    whoami: WhoAmIResponse
-  }
-) => {
+export const Dashboard = () => {
+  const { user } = useAuth();
+
   const stats = [
     {
       title: "Projects",
@@ -53,7 +54,9 @@ export const Dashboard = (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Welcome back, {whoami.user.full_name}</h1>
+          <h1 className="text-3xl font-bold text-white">
+            Welcome back, {user?.user.full_name ?? "User"}!
+          </h1>
           <p className="text-gray-400 mt-2">
             Here's what's happening with your projects and environments.
           </p>
@@ -68,7 +71,10 @@ export const Dashboard = (
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
+            <Card
+              key={stat.title}
+              className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors"
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-gray-400">
                   {stat.title}
@@ -76,7 +82,9 @@ export const Dashboard = (
                 <Icon className={`w-4 h-4 ${stat.color}`} />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{stat.value}</div>
+                <div className="text-2xl font-bold text-white">
+                  {stat.value}
+                </div>
                 <p className="text-xs text-gray-400 mt-1">{stat.change}</p>
               </CardContent>
             </Card>
@@ -95,7 +103,10 @@ export const Dashboard = (
           <CardContent>
             <div className="space-y-4">
               {recentProjects.map((project, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer"
+                >
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-electric_indigo-500 to-violet-500 rounded-lg flex items-center justify-center">
                       <Database className="w-5 h-5 text-white" />
@@ -108,7 +119,9 @@ export const Dashboard = (
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-400">Updated {project.updated}</p>
+                    <p className="text-xs text-gray-400">
+                      Updated {project.updated}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -142,10 +155,15 @@ export const Dashboard = (
                   user: "Admin",
                 },
               ].map((activity, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-750 transition-colors">
+                <div
+                  key={index}
+                  className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-750 transition-colors"
+                >
                   <div className="w-2 h-2 bg-electric_indigo-500 rounded-full mt-2"></div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-white">{activity.action}</p>
+                    <p className="text-sm font-medium text-white">
+                      {activity.action}
+                    </p>
                     <p className="text-xs text-gray-400">{activity.details}</p>
                     <p className="text-xs text-gray-500 mt-1">
                       {activity.time} by {activity.user}
@@ -160,3 +178,5 @@ export const Dashboard = (
     </div>
   );
 };
+
+export default Dashboard;

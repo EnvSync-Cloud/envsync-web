@@ -1,38 +1,33 @@
-
-import { Bell, Search, ChevronDown } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Header = () => {
+  const { user } = useAuth();
+  
   return (
     <header className="bg-gray-900 border-b border-gray-800 px-6 py-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-2">
-            <select className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-electric_indigo-500">
-              <option>Personal Workspace</option>
-              <option>Team Workspace</option>
-            </select>
-          </div>
-          
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Search projects, configs, secrets..."
-              className="pl-10 bg-gray-800 border-gray-700 focus:border-electric_indigo-500 text-white placeholder-gray-400"
+        {/* Organization Info */}
+        <div className="flex items-center space-x-3">
+          {user?.org?.logo_url ? (
+            <img 
+              src={user.org.logo_url} 
+              alt={`${user.org.name} logo`}
+              className="w-8 h-8 rounded-lg object-cover"
             />
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="text-white hover:bg-gray-800">
-            <Bell className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-electric_indigo-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">JD</span>
+          ) : (
+            <div className="w-8 h-8 bg-gradient-to-br from-electric_indigo-500 to-magenta-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">
+                {user?.org?.name?.charAt(0)?.toUpperCase() || 'O'}
+              </span>
             </div>
-            <ChevronDown className="w-4 h-4 text-gray-400" />
+          )}
+          <div className="flex flex-col">
+            <h1 className="text-white font-semibold text-lg">
+              {user?.org?.name || 'Organization'}
+            </h1>
+            <span className="text-gray-400 text-xs">
+              @{user?.org?.slug}
+            </span>
           </div>
         </div>
       </div>
