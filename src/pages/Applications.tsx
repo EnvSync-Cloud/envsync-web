@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dialog";
 import { NewProjectModal } from "@/components/NewProjectModal";
 import { ProjectEnvironments } from "@/components/ProjectEnvironments";
+import { AppSettingsModal } from "@/components/AppSettingsModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -100,7 +101,9 @@ export const Applications = () => {
   // Modal States
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<App | null>(null);
+  const [projectToEdit, setProjectToEdit] = useState<App | null>(null);
 
   // Loading states for individual actions
   const [actionLoadingStates, setActionLoadingStates] = useState<Record<string, boolean>>({});
@@ -132,6 +135,8 @@ export const Applications = () => {
       try {
         const response = await api.applications.getApps();
 
+        console.log("Fetched applications:", response);
+
         // Enhanced data mapping with additional metadata
         const apps: App[] = response.map((app) => ({
           id: app.id,
@@ -142,8 +147,8 @@ export const Applications = () => {
           status: "active", // You might want to get this from the API
           created_at: new Date(app.created_at),
           updated_at: new Date(app.updated_at),
-          env_count: app.metadata?.env_count || 0,
-          secret_count: app.metadata?.secret_count || 0,
+          env_count: app.envCount,
+          secret_count: 0,
         }));
 
         return apps;
@@ -212,6 +217,11 @@ export const Applications = () => {
     setShowDeleteDialog(true);
   }, []);
 
+  const handleManageProject = useCallback((project: App) => {
+    setProjectToEdit(project);
+    setShowSettingsModal(true);
+  }, []);
+
   const handleConfirmDelete = useCallback(() => {
     if (!projectToDelete) return;
     deleteProjectMutation.mutate(projectToDelete.id);
@@ -220,6 +230,11 @@ export const Applications = () => {
   const handleCloseDeleteDialog = useCallback(() => {
     setShowDeleteDialog(false);
     setProjectToDelete(null);
+  }, []);
+
+  const handleCloseSettingsModal = useCallback(() => {
+    setShowSettingsModal(false);
+    setProjectToEdit(null);
   }, []);
 
   const handleFilterChange = useCallback((key: keyof FilterOptions, value: string) => {
@@ -294,7 +309,8 @@ export const Applications = () => {
     });
 
     return filtered;
-  }, [applications, debouncedSearchQuery, filterOptions]);
+  }, [applications,
+    debouncedSearchQuery, filterOptions]);
 
   // Memoized statistics
   const statistics = useMemo(() => {
@@ -374,6 +390,11 @@ export const Applications = () => {
             </div>
           </div>
         </div>
+        {/* New Project Modal */}
+        <NewProjectModal
+          isOpen={showNewProjectModal}
+          onClose={() => setShowNewProjectModal(false)}
+        />
       </div>
     );
   }
@@ -408,6 +429,11 @@ export const Applications = () => {
             Create Your First Project
           </Button>
         </div>
+        {/* New Project Modal */}
+        <NewProjectModal
+          isOpen={showNewProjectModal}
+          onClose={() => setShowNewProjectModal(false)}
+        />
       </div>
     );
   }
@@ -417,7 +443,7 @@ export const Applications = () => {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-                    <h1 className="text-3xl font-bold text-white">Projects</h1>
+          <h1 className="text-3xl font-bold text-white">Projects</h1>
           <p className="text-slate-400 mt-2">
             Manage your applications and their configurations
           </p>
@@ -642,7 +668,7 @@ export const Applications = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-white hover:bg-slate-700 rounded-xl cursor-pointer"
-                        onClick={() => handleProjectClick(app.id)}
+                        onClick={() => handleManageProject(app)}
                       >
                         <Settings className="w-4 h-4 mr-2" />
                         Manage
@@ -766,9 +792,17 @@ export const Applications = () => {
         isOpen={showNewProjectModal}
         onClose={() => setShowNewProjectModal(false)}
       />
+
+      {/* App Settings Modal */}
+      {projectToEdit && (
+        <AppSettingsModal
+          isOpen={showSettingsModal}
+          onClose={handleCloseSettingsModal}
+          app={projectToEdit}
+        />
+      )}
     </div>
   );
 };
 
 export default Applications;
-

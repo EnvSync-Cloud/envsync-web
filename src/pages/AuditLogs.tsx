@@ -231,7 +231,7 @@ export const AuditLogs = () => {
         const usersMap = new Map(usersResponse.map((user) => [user.id, user]));
 
         // Transform audit logs data
-        const logs: AuditLog[] = auditLogsResponse.map((log) => ({
+        const logs: AuditLog[] = auditLogsResponse.auditLogs.map((log) => ({
           id: log.id,
           action: log.action as AuditActions,
           details: log.details || getActionDescription(log.action as AuditActions),
@@ -249,7 +249,7 @@ export const AuditLogs = () => {
         }));
 
         // Update pagination info (this would come from API response headers in real implementation)
-        const totalCount = auditLogsResponse.length; // This should come from API
+        const totalCount = auditLogsResponse.totalPages; // This should come from API
         const totalPages = Math.ceil(totalCount / pagination.pageSize);
 
         setPagination(prev => ({
