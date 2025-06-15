@@ -6,6 +6,7 @@ export interface IAuthContext {
   isLoading: boolean;
   isAuthenticated: boolean;
   api: EnvSyncAPISDK;
+  token: string | null;
 }
 
 export const AuthContext =

@@ -11,9 +11,11 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthContextProvider>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Routes />
+        <div className="h-screen overflow-hidden">
+          <Toaster />
+          <Sonner />
+          <Routes />
+        </div>
       </TooltipProvider>
     </AuthContextProvider>
   </QueryClientProvider>
