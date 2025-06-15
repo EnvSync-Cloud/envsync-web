@@ -19,10 +19,11 @@ interface SidebarProps {
 
 export const Sidebar = ({ expanded, onToggle }: SidebarProps) => {
   const { user, isLoading, token } = useAuth();
-
+  const { pathname } = useLocation();
+  
+  // Move the early return after all hooks are called
   if (isLoading || !user) return null;
 
-  const { pathname } = useLocation();
   const activeView = pathname.split("/")[1] || "applications";
 
   const handleLogout = () => {
@@ -39,14 +40,9 @@ export const Sidebar = ({ expanded, onToggle }: SidebarProps) => {
       <div className="p-4 flex-shrink-0 border-b border-slate-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-xl flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-lg">E</span>
+            <div className="mx-auto w-15 h-15 rounded-xl flex items-center justify-center">
+              <img src="/EnvSync.svg" alt="EnvSync Logo" className="w-20 h-20" />
             </div>
-            {expanded && (
-              <span className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent transition-opacity duration-300">
-                EnvSync
-              </span>
-            )}
           </div>
           <button
             onClick={onToggle}
