@@ -1,73 +1,138 @@
-# Welcome to your Lovable project
+# EnvSync Web 🌐
 
-## Project info
+The web dashboard for [EnvSync Cloud](https://github.com/envsync-cloud) - seamlessly sync your environment configurations across web applications.
 
-**URL**: https://lovable.dev/projects/c84bf909-d356-437d-8690-1e972d4e45e4
+> **Built with [Loveable](https://loveable.dev)** ❤️  
+> A modern React frontend for managing your environment variables with style.
 
-## How can I edit this code?
+## ✨ What is EnvSync?
 
-There are several ways of editing your application.
+EnvSync keeps your `.env` files, configuration secrets, and environment variables perfectly synchronized across development, staging, and production environments.
 
-**Use Lovable**
+**Key Benefits:**
+- 🔒 **Secure** - End-to-end encryption for sensitive data
+- ⚡ **Fast** - Real-time synchronization across environments  
+- 🌐 **Web-first** - Built for modern web development workflows
+- 🔧 **Developer-friendly** - Intuitive web interface
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c84bf909-d356-437d-8690-1e972d4e45e4) and start prompting.
+## 🛠️ Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **React** - UI library
+- **Vite** - Build tool and dev server
+- **TailwindCSS** - Utility-first CSS framework
+- **React Query** - Data fetching and state management
+- **Zod** - TypeScript-first schema validation
 
-**Use your preferred IDE**
+## 🚀 Quick Start
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites
+- [Bun](https://bun.sh/) - JavaScript runtime and package manager
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Installation
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+git clone https://github.com/envsync-cloud/envsync-web.git
+cd envsync-web
 ```
 
-**Edit a file directly in GitHub**
+```bash
+bun install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Environment Setup
 
-**Use GitHub Codespaces**
+Create a `.env` file:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```env
+VITE_API_BASE_URL=https://api.envsync.cloud
+```
 
-## What technologies are used for this project?
+### Development
 
-This project is built with:
+```bash
+bun dev
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Visit `http://localhost:8080` to see your EnvSync dashboard! 🎉
 
-## How can I deploy this project?
+## 📝 Available Scripts
 
-Simply open [Lovable](https://lovable.dev/projects/c84bf909-d356-437d-8690-1e972d4e45e4) and click on Share -> Publish.
+```bash
+# Start development server
+bun dev
 
-## Can I connect a custom domain to my Lovable project?
+# Build for production
+bun run build
 
-Yes, you can!
+# Preview production build
+bun run preview
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+# Run linting
+bun run lint
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 📁 Project Structure
+
+```
+envsync-web/
+├── src/
+│   ├── components/    # Reusable UI components
+│   ├── pages/         # Dashboard pages
+│   ├── hooks/         # Custom React hooks
+│   ├── lib/           # API clients & utilities
+|   ├── layout/        # Web Layouts
+|   └── contexts/      # React Context API
+└─── public/            # Static assets
+```
+
+## 🔧 Configuration
+
+### Required Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `VITE_API_BASE_URL` | EnvSync API backend URL | `https://api.envsync.cloud` |
+
+## 🏗️ Build & Deploy
+
+```bash
+bun run build
+```
+
+```bash
+bun run preview
+```
+
+Deploy the `dist/` directory to any static hosting service (Vercel, Netlify, etc.).
+
+## 🌟 EnvSync Ecosystem
+
+- **[envsync-cli](https://github.com/envsync-cloud/envsync-cli)** - Command line interface
+- **[envsync-api](https://github.com/envsync-cloud/envsync-api)** - REST API and backend services  
+- **[envsync-landing](https://github.com/envsync-cloud/envsync-landing)** - Landing page
+- **envsync-web** - Web dashboard (this repo)
+
+## 🤝 Contributing
+
+We're building the future of environment management! 
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 💬 Support & Community
+
+- 📧 **Email:** hi@envsync.com
+- 📖 **Blog:** [blog.envsync.com](https://blog.envsync.com)
+
+---
+
+**Making environment configuration simple, secure, and synchronized** 🌟
+
+Built with ❤️ by the EnvSync team using [Loveable](https://loveable.dev)
