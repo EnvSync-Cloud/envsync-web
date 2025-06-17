@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  EnvSyncAPISDK,
-  type WhoAmIResponse,
-} from "@envsync-cloud/envsync-ts-sdk";
-import { env } from "@/utils/env";
+import { type WhoAmIResponse } from "@envsync-cloud/envsync-ts-sdk";
+import { getSDK } from "@/api";
 
 export const useAuth = () => {
   const [user, setUser] = useState<WhoAmIResponse | undefined>(undefined);
@@ -11,10 +8,7 @@ export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const accessToken = localStorage.getItem("access_token");
-  const api = new EnvSyncAPISDK({
-    BASE: env.VITE_API_BASE_URL,
-    TOKEN: accessToken,
-  });
+  const api = getSDK(accessToken);
 
   useEffect(() => {
     if (!accessToken) {
