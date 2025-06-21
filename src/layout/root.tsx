@@ -3,7 +3,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
 import { Outlet } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 export const RootLayout = () => {
   const { user, isAuthenticated, isLoading } = useAuth();

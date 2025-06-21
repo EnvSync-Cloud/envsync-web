@@ -101,30 +101,6 @@ const useDeleteApiKey = ({
   });
 };
 
-/**
- * const updateApiKeyMutation = useMutation({
-    mutationFn: async ({
-      apiKeyId,
-      updateData,
-    }: {
-      apiKeyId: string;
-      updateData: UpdateApiKeyRequest;
-    }) => {
-      setActionLoading(apiKeyId, true);
-      return await api.apiKeys.updateApiKey(apiKeyId, updateData);
-    },
-    onSuccess: (_, { apiKeyId }) => {
-      queryClient.invalidateQueries({ queryKey: ["apiKeys"] });
-      setActionLoading(apiKeyId, false);
-    },
-    onError: (error, { apiKeyId }) => {
-      console.error("Failed to update API key:", error);
-      alert("Failed to update API key. Please try again.");
-      setActionLoading(apiKeyId, false);
-    },
-  });
- */
-
 export interface UpdateApiKeyMutationVariables {
   apiKeyId: string;
   updateData: UpdateApiKeyRequest;

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
-const navigation = [
+let navigation = [
   { id: "applications", name: "Projects", icon: Database },
   { id: "users", name: "Team", icon: Users },
   { id: "apikeys", name: "API Keys", icon: Key },
@@ -23,6 +23,34 @@ export const Sidebar = ({ expanded, onToggle }: SidebarProps) => {
   
   // Move the early return after all hooks are called
   if (isLoading || !user) return null;
+
+  // Determine user's role and permissions, and render navigation accordingly
+
+  const filteredNavigation = navigation.filter(item => {
+    const { have_api_access, is_admin, is_master, can_edit, can_view } = user.role;
+    
+    switch (item.id) {
+      case "apikeys":
+        return have_api_access || is_admin || is_master;
+      
+      case "applications":
+        return can_edit || is_admin || is_master || can_view;
+      case "users":
+        return true;
+      
+      case "organisation":
+      case "audit":
+        return is_admin || is_master;
+      
+      case "settings":
+        return true;
+      
+      default:
+        return true;
+    }
+  });
+
+  navigation = filteredNavigation;
 
   const activeView = pathname.split("/")[1] || "applications";
 

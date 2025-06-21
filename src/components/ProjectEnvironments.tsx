@@ -84,7 +84,7 @@ export const ProjectEnvironments = ({
   projectNameId,
   onBack,
 }: ProjectEnvironmentsProps) => {
-  const { api } = useAuth();
+  const { api, user } = useAuth();
   const queryClient = useQueryClient();
 
   // UI State
@@ -482,6 +482,20 @@ export const ProjectEnvironments = ({
     return projectData?.environments.find(env => env.id === selectedEnv);
   }, [projectData?.environments, selectedEnv]);
 
+  if(!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center text-gray-400">
+          Loading user data...
+        </div>
+      </div>
+    );
+  }
+
+  const {
+    can_edit
+  } = user.role;
+
   // Loading states
   if (isProjectLoading) {
     return (
@@ -559,33 +573,27 @@ export const ProjectEnvironments = ({
             <p className="text-gray-400">Environment Variables</p>
           </div>
         </div>
-        {/* <Button
-          onClick={() => setShowAddEnvVarDialog(true)}
-          className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
-          disabled={!selectedEnv || addEnvVarMutation.isPending}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Variable
-        </Button> */}
-        <div className="flex items-center space-x-3">
-          <Button
-            onClick={() => setShowBulkImportDialog(true)}
-            variant="outline"
-            className="text-white border-gray-600 hover:bg-gray-700"
-            disabled={!selectedEnv}
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            Import .env
-          </Button>
-          <Button
-            onClick={() => setShowAddEnvVarDialog(true)}
-            className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
-            disabled={!selectedEnv || addEnvVarMutation.isPending}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Variable
-          </Button>
-        </div>
+        { can_edit && (
+          <div className="flex items-center space-x-3">
+            <Button
+              onClick={() => setShowBulkImportDialog(true)}
+              variant="outline"
+              className="text-white border-gray-600 hover:bg-gray-700"
+              disabled={!selectedEnv}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Import .env
+            </Button>
+            <Button
+              onClick={() => setShowAddEnvVarDialog(true)}
+              className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
+              disabled={!selectedEnv || addEnvVarMutation.isPending}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Variable
+            </Button>
+          </div>
+        )}
 
       </div>
 
@@ -713,11 +721,13 @@ export const ProjectEnvironments = ({
                 {searchQuery
                   ? `No variables match "${searchQuery}"`
                   : selectedEnv
-                    ? "Add your first environment variable to get started"
+                    ? can_edit 
+                      ? "Add your first environment variable to get started"
+                      : "No environment variables configured for this environment"
                     : "Select an environment to view variables"
                 }
               </p>
-              {selectedEnv && !searchQuery && (
+              {selectedEnv && !searchQuery && can_edit && (
                 <Button
                   onClick={() => setShowAddEnvVarDialog(true)}
                   className="bg-electric_indigo-500 hover:bg-electric_indigo-600 text-white"
@@ -728,6 +738,7 @@ export const ProjectEnvironments = ({
               )}
             </div>
           )}
+
 
           {/* Variables Table */}
           {!isEnvVarsLoading && !envVarsError && filteredVars.length > 0 && (
@@ -748,7 +759,7 @@ export const ProjectEnvironments = ({
                     >
                       <td className="py-4 px-4">
                         <div className="flex items-center space-x-2">
-                          <code className="text-sm font-mono text-electric_indigo-300 bg-gray-900 px-2 py-1 rounded">
+                          <code className="text-sm font-mono text-gray-300 bg-gray-900 px-2 py-1 rounded">
                             {envVar.key}
                           </code>
                           {envVar.sensitive && (
